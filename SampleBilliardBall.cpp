@@ -2,7 +2,7 @@
 #include "SampleBilliardBoard.h"
 #include "BilliardPocket.h"
 
-SampleBilliardBall::SampleBilliardBall(void)
+SampleBilliardBall::SampleBilliardBall(void) 
 	: SampleBilliardBall(sf::Vector2f(100, 100), 10, sf::Color::Red)
 {
 	// nothing to do 
