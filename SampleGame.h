@@ -41,6 +41,8 @@ protected:
 private:
 	// Sample Game 에서 공을 쏘는 강도 표시
 	void renderDragpower(sf::RenderTarget& target);
+	// Sample Game 에서의 점수판
+	void renderScore(sf::RenderTarget& target);
 
 private:
 	// Sample Game에서 관리하는 게임 오브젝트들 (공, 당구대 등) 

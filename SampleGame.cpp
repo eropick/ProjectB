@@ -13,18 +13,17 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	gameObjects.push_back(new SampleBilliardBoard());
 
 	// SampleGame을 위한 당구공 생성 및 등록 
-
-	BilliardPocket* Pocket[6];
 	
+	BilliardPocket* Pocket[6];
 	//포켓 x,y 좌표 한 번에 변경 가능하도록 해놨습니다.
-	float x[2] = { 612,990 };
-	float y[3] = { 60,450,840 };
+	float x[2] = { 593,1014 };
+	float y[3] = { 45,450,848 };
 	sf::Vector2f PocketCord[6] = {
 	{x[0], y[0]},{x[0], y[1]},{x[0], y[2]},
 	{x[1], y[0]},{x[1], y[1]},{x[1], y[2]},
 	};
 	for (int i = 0; i < 6; ++i) {
-		Pocket[i] = new BilliardPocket(PocketCord[i], 10, sf::Color::Black);
+		Pocket[i] = new BilliardPocket(PocketCord[i], 12, sf::Color::Black);
 		gameObjects.push_back(Pocket[i]);
 	}
 	//플레이어볼
@@ -37,20 +36,30 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	//게임볼
 	SampleBilliardGameBall* ball[15];
 	typedef sf::Color C;
+
 	//색 매핑
-	C color[15] = 
-	{C::Green,C::Yellow,C::Red,  
-	C::Blue,C::Green,C::Cyan,  
-	C::Yellow,C::Black,C::Red,
-    C::Blue,C::Green,C::Cyan,
-	C::Green, C::Blue,C::Red};
+	//1~7번 공은 단색공 = 총 7개
+    //9번~15번 공은 줄무늬 공 = 총 7개
+    //노랑, 남색, 빨강, 보라(핑크), 주황, 초록, 갈색  = 총 7개
+	C color[15] = {
+    C::Yellow, C::Color(0,0,128), C::Red,
+    C::Color(77,55,123), C::Color(255,165,0), C::Green,
+    C::Color(111, 79, 48),C::Black,C::Yellow,
+    C::Color(0,0,128), C::Red,C::Color(77,55,123),
+    C::Color(255,165,0), C::Green,  C::Color(111, 79, 48),
+	};
 	//공 좌표 매핑
-	sf::Vector2f Cord[15] = 
-	{ {790, 290},{810, 290},{780, 280},
-	{820, 280},{800, 280},{770, 270},
-	{790, 270},{810, 270},{830, 270},
-	{760, 260},{780, 260},{800, 260},
-	{820, 260},{840, 260},{800, 300}};
+	//1번은 맨 앞에, 8번은 가운데
+    //2번과 3번은 양쪽 끝에
+    //1번 다음 배열은 띠공-띠공
+    //중간배열은 색꽁-띠공 번갈아가면서
+	sf::Vector2f Cord[15] =
+	{ {800, 300},{840, 260},{760, 260},
+	{780, 280},{810, 270},{770, 270},
+	{800, 260},{800, 280},{830, 270},
+	{790, 290},{780, 260},{790, 270},
+	{820, 260},{810, 290},{820, 280} };
+
 	//배열 초기화
 	for (int i = 0; i < 15; ++i) {
 		ball[i] = new SampleBilliardGameBall(Cord[i], 10, color[i]);
@@ -165,7 +174,6 @@ void SampleGame::update(void)
 		}
 	}
 
-
 	// 끌었다가 놓은 공에 속도를 지정하고 표시 해제 
 	if (!isDraggingBall && draggedBall != nullptr)
 	{
@@ -189,10 +197,14 @@ void SampleGame::render(sf::RenderTarget& target)
 		obj->render(target);
 	}
 
+	//게임 스코어
+	renderScore(target);
+
 	// 공을 드래그 하면 세기 표시 (길이 및 색)
 	renderDragpower(target);
-
-	// 게임 UI 렌더링 
+	
+	// 게임 UI 렌더링
+	
 }
 
 void SampleGame::renderDragpower(sf::RenderTarget& target)
@@ -218,4 +230,47 @@ void SampleGame::renderDragpower(sf::RenderTarget& target)
 		points.append(end);
 		target.draw(points);
 	}
+}
+
+void SampleGame::renderScore(sf::RenderTarget& target) {
+	// 점수판
+	sf::Text P1_score;
+	sf::Text P2_score;
+	sf::Text ScoreText;
+	
+	//폰트 설정
+	P1_score.setFont(getFont());
+	P2_score.setFont(getFont());
+	ScoreText.setFont(getFont());
+
+	//색
+	P1_score.setFillColor(sf::Color::White);
+	P2_score.setFillColor(sf::Color::White);
+	ScoreText.setFillColor(sf::Color::Cyan);
+
+	//크기
+	P1_score.setCharacterSize(80);
+	P2_score.setCharacterSize(80);
+	ScoreText.setCharacterSize(50);
+
+	P1_score.setString("0");
+	P2_score.setString("0");
+	
+	P1_score.setOutlineColor(sf::Color::Cyan);
+	P2_score.setOutlineColor(sf::Color::Cyan);
+
+	P1_score.setOutlineThickness(1.f);
+	P2_score.setOutlineThickness(1.f);
+
+	ScoreText.setString("player1 | player2");
+	ScoreText.setOutlineColor(sf::Color::White);
+	ScoreText.setOutlineThickness(1.f);
+
+	P1_score.setPosition(120.f, 250.f);
+	P2_score.setPosition(300.f, 250.f);
+	ScoreText.setPosition(70.f, 200.f);
+
+	target.draw(P1_score);
+	target.draw(P2_score);
+	target.draw(ScoreText);
 }

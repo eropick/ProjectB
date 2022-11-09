@@ -9,21 +9,88 @@ SampleBilliardBoard::SampleBilliardBoard(void)
 	sprite.setTexture(texture);
 	sprite.setPosition(572.5f, 25.f);
 
-	// 당구대 경계 초기화 - 상하좌우 
-	SampleBilliardBoard::Border lineTop(632.5f, 55.f, 968.5f, 55.f);
-	SampleBilliardBoard::Border lineLeft1(602.5f, 85.f, 602.5f, 400.5f);
-	SampleBilliardBoard::Border lineLeft2(602.5f, 445.5f, 602.5f, 800.5f);
+	// 당구대 경계 초기화
+	
+	//공의 반경만큼 당구대 범위가 수정됩니다.
+	/*
+		내부 x,y좌표하고
+		외부 x,y좌표
+		공 반경만 수정해서 사용가능합니다.
+	*/
+	float Radius = 10.f;
+	Radius = Radius + 5.f; //공의 반경 + 여분
+	
+	//내부 경계
+	float inX[2] = { 602.5f,990.f };
+	float inY[2] = { 55.f,840.f };
+	typedef SampleBilliardBoard::Border B;
+	B inLineTop(inX[0]+Radius, inY[0], inX[1]- Radius, inY[0]);
+	B inLineBottom(inX[0]+ Radius, inY[1], inX[1]- Radius, inY[1]);
 
-	SampleBilliardBoard::Border lineBottom(632.5f, 830.5f, 968.5f, 830.5f);
-	SampleBilliardBoard::Border lineRight1(998.5f, 85.5f, 998.5f, 400.5f);
-	SampleBilliardBoard::Border lineRight2(998.5f, 445.5f, 998.5f, 800.5f);
+	B inLineLeft_Up(inX[0], inY[0]+ Radius, inX[0], ((inY[1] - inY[0]) / 2) + inY[0] - Radius);
+	B inLineLeft_Down(inX[0], ((inY[1] - inY[0]) / 2) + inY[0] + Radius, inX[0], inY[1]-Radius);
+	
+	B inLineRight_Up(inX[1], inY[0] + Radius, inX[1], ((inY[1] - inY[0]) / 2) + inY[0] - Radius);
+	B inLineRight_Down(inX[1], ((inY[1] - inY[0]) / 2) + inY[0] + Radius, inX[1], inY[1] - Radius);
 
-	borderLines.push_back(lineTop);
-	borderLines.push_back(lineBottom);
-	borderLines.push_back(lineLeft1);
-	borderLines.push_back(lineRight1);
-	borderLines.push_back(lineLeft2);
-	borderLines.push_back(lineRight2);
+	//외부경계
+	float outX[2] = { inX[0]-20.f,inX[1] + 25.f};
+	float outY[2] = { inY[0]-20.f,inY[1] + 20.f};
+
+	B outLineTop(outX[0], outY[0], outX[1], outY[0]);
+	B outLineBottom(outX[0], outY[1], outX[1], outY[1]);
+	B outLineLeft(outX[0], outY[0], outX[0], outY[1]);
+	B outLineRight(outX[1], outY[0], outX[1], outY[1]);
+
+	//포켓 경계 :T(top), L(left),R(right),B(bottom) ,M(mid), O(out), I(in)
+	B TLOI_Up(inX[0] + Radius,outY[0], inX[0] + Radius, inY[0]); // 위쪽 라인 왼쪽 부분 경계 위 |
+	B TLOI_Down(outX[0], inY[0] + Radius, inX[0], inY[0] + Radius); // 위쪽 라인 왼쪽 부분 경계 아래 -
+	
+	B TROI_Up(inX[1] - Radius, outY[0], inX[1] - Radius, inY[0]); // 위쪽 라인 오른쪽 부분 경계 위 |
+	B TROI_Down(inX[1], inY[0] + Radius, outX[1], inY[0] + Radius); // 위쪽 라인 오른쪽 부분 경계 아래 -
+
+	B MLOI_Up(outX[0], ((inY[1] - inY[0]) / 2) + inY[0] - Radius, 
+		inX[0], ((inY[1] - inY[0]) / 2) + inY[0] - Radius); // 왼쪽 라인 가운데 위쪽 -
+	B MLOI_Down(outX[0], ((inY[1] - inY[0]) / 2) + inY[0] + Radius, 
+		inX[0], ((inY[1] - inY[0]) / 2) + inY[0] + Radius); // 왼쪽 라인 가운데 아래쪽 -
+
+	B MROI_Up(inX[1], ((inY[1] - inY[0]) / 2) + inY[0] - Radius, 
+		outX[1], ((inY[1] - inY[0]) / 2) + inY[0] - Radius); // 오른쪽 라인 가운데 위쪽 -
+	B MROI_Down(inX[1], ((inY[1] - inY[0]) / 2) + inY[0] + Radius,
+		outX[1], ((inY[1] - inY[0]) / 2) + inY[0] + Radius); // 오른쪽 라인 가운데 아래쪽 -
+
+	B BLOI_Up(outX[0], inY[1] - Radius, inX[0], inY[1] - Radius); // 아래쪽 라인 왼쪽 부분 경계 위 -
+	B BLOI_Down(inX[0] + Radius, inY[1], inX[0] + Radius, outY[1]); // 위쪽 라인 왼쪽 부분 경계 아래 |
+
+	B BROI_Up(inX[1], inY[1] - Radius,outX[1], inY[1] - Radius); // 위쪽 라인 오른쪽 부분 경계 위 -
+	B BROI_Down(inX[1] - Radius, inY[1], inX[1] - Radius, outY[1]); // 위쪽 라인 오른쪽 부분 경계 아래 |
+
+	borderLines.push_back(inLineTop);
+	borderLines.push_back(inLineBottom);
+	borderLines.push_back(inLineLeft_Up);
+	borderLines.push_back(inLineLeft_Down);
+	borderLines.push_back(inLineRight_Up);
+	borderLines.push_back(inLineRight_Down);
+
+	borderLines.push_back(outLineTop);
+	borderLines.push_back(outLineBottom);
+	borderLines.push_back(outLineLeft);
+	borderLines.push_back(outLineRight);
+
+	borderLines.push_back(TLOI_Up);
+	borderLines.push_back(TLOI_Down);
+	borderLines.push_back(TROI_Up);
+	borderLines.push_back(TROI_Down);
+
+	borderLines.push_back(MLOI_Up);
+	borderLines.push_back(MLOI_Down);
+	borderLines.push_back(MROI_Up);
+	borderLines.push_back(MROI_Down);
+
+	borderLines.push_back(BLOI_Up);
+	borderLines.push_back(BLOI_Down);
+	borderLines.push_back(BROI_Up);
+	borderLines.push_back(BROI_Down);
 }
 
 // 소멸자 

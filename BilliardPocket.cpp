@@ -4,6 +4,8 @@
 //정적변수
 vector<SampleBilliardObject*> BilliardPocket::Pocket;
 
+
+
 //소멸자.
 BilliardPocket::~BilliardPocket() {
 	for (SampleBilliardObject* obj : Pocket)
@@ -43,10 +45,13 @@ void BilliardPocket::collideWithBall(SampleBilliardBall& other)
 	float distanceBetween = (sqrtf((distance.x * distance.x) + (distance.y * distance.y)));
 
 	// 두 공이 겹치는지 검사 
-	if (distanceBetween < (getRadius() + other.getRadius()))
+	if (distanceBetween < getRadius()/1.5)  
 	{
 		putBall(other); //포켓에 공넣기
-		other.setPosition(10, 10); //충돌한 공의 위치 지정
+		SampleBilliardGameBall* Ball = dynamic_cast<SampleBilliardGameBall*>(&other);
+		//닿으면 바로 넣어지지 않고 특정 비율 넘어가면 포켓에 넣는 것으로 판정
+		int size = Pocket.size();
+		other.setPosition(300,800-(2*size*Ball->getRadius())); //충돌한 공의 위치 지정
 		other.setVelocity(0, 0); 
 		setVelocity(0, 0); //포켓 속도0
 	}
@@ -91,7 +96,7 @@ void BilliardPocket::collideWithBoard(SampleBilliardBoard& other)
 
 //렌더링 재정의
 void BilliardPocket::render(sf::RenderTarget& target) {
-	printBall(target);
+	//printBall(target); 벡터 테스트코드
 	target.draw(getVertices());
 }
 
@@ -115,7 +120,24 @@ void BilliardPocket::putBall(SampleBilliardObject& Ball) {
 	Pocket.push_back(&Ball);
 }
 
-//포켓에서 공빼오기
-SampleBilliardObject* BilliardPocket::outBall(int i) const {
-	return Pocket[i];
+//포켓에서 공 빼오기
+SampleBilliardObject& BilliardPocket::outBall(int index){
+	SampleBilliardObject* Ball = Pocket[index];
+	//포켓 시작에서 끝 범위에서 해당 값을 가진 오브젝트를 제거
+	Pocket.erase(remove(Pocket.begin(), Pocket.end(), Pocket[index]), Pocket.end());
+	return *Ball;
+}
+
+//포켓안에 해당 공이 있는지 검사
+int BilliardPocket::InPocket(SampleBilliardObject& other){ 
+	int index = -1;
+	SampleBilliardGameBall* oB = dynamic_cast<SampleBilliardGameBall*>(&other);
+	for (int i = 0; i < Pocket.size(); ++i) {
+		SampleBilliardGameBall* pB = dynamic_cast<SampleBilliardGameBall*>(Pocket[i]);
+		if (pB == oB) { //포켓안에 있다면
+			index = i;
+			break;
+		}
+	}
+	return index;
 }
