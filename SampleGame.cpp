@@ -27,14 +27,14 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 		gameObjects.push_back(Pocket[i]);
 	}
 	//플레이어볼
-	SampleBilliardGameBall* PlayerBall= 
+	SampleBilliardGameBall* PlayerBall =
 		new SampleBilliardGameBall(sf::Vector2f(800, 500), 10, sf::Color::White);
 	PlayerBall->setOwner("P");
 	PlayerBall->setPlayable(true);
 	gameObjects.push_back(PlayerBall);
 
 	//게임볼
-	SampleBilliardGameBall* ball[15];
+	SampleBilliardBall* ball[15];
 	typedef sf::Color C;
 
 	//색 매핑
@@ -62,11 +62,10 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 
 	//배열 초기화
 	for (int i = 0; i < 15; ++i) {
-		ball[i] = new SampleBilliardGameBall(Cord[i], 10, color[i]);
+		ball[i] = new SampleBilliardBall(Cord[i], 10, color[i]);
 		char Intstr[10];
 		_itoa(i+1, Intstr, 10); //정수를 문자열로
 		std::string str = Intstr;
-		ball[i]->setPlayable(false);
 		ball[i]->setOwner(str);
 		gameObjects.push_back(ball[i]);
 	}

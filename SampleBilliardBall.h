@@ -62,6 +62,9 @@ public:
 	float getMass(void) const;
 	sf::Color getColor(void) const;
 	const sf::VertexArray& getVertices(void) const;
+	void setOwner(std::string owner);
+	bool isOwner(std::string owner);
+	std::string getOwner(void);
 
 private:
 	// 공과 충돌한 경우 
@@ -69,7 +72,9 @@ private:
 
 	// 당구대와 충돌한 경우 
 	void collideWithBoard(SampleBilliardBoard& other);
-	
+
+
+
 private:
 	sf::Vector2f position;
 	sf::Vector2f acceleration;
@@ -81,4 +86,6 @@ private:
 
 	sf::VertexArray vertices;
 	sf::Color color;
+
+	std::string owner;
 };

@@ -1,6 +1,8 @@
 #include "SampleBilliardBall.h"
 #include "SampleBilliardBoard.h"
 #include "BilliardPocket.h"
+#include "SampleGame.h"
+
 
 SampleBilliardBall::SampleBilliardBall(void) 
 	: SampleBilliardBall(sf::Vector2f(100, 100), 10, sf::Color::Red)
@@ -199,6 +201,35 @@ void SampleBilliardBall::render(sf::RenderTarget& target)
 {
 	// 렌더링 윈도우에 원을 구성하는 버텍스를 그림 
 	target.draw(vertices);
+
+	// 9번~15번공은 줄무늬 입력
+	sf::RectangleShape rectangle(sf::Vector2f(19, 9));
+	rectangle.setFillColor(sf::Color::White);
+	rectangle.setPosition(getPosition() - sf::Vector2f(10, 4));
+	if (stoi(owner) >= 9)
+		target.draw(rectangle);
+
+	// SampleGame에서는 각 공에 숫자 표시 
+	sf::Text ballText;
+	ballText.setFont(SampleGame::getFont());
+	ballText.setFillColor(sf::Color::Black);
+	ballText.setString(owner);
+	ballText.setCharacterSize(13);
+
+	// 10 이상은 글자가 떙겨지므로 위치 다시 설정
+	if (stoi(owner) / 10 == 1) //2자리수 이상
+		ballText.setPosition(getPosition() - sf::Vector2f(8, 10));
+	else
+		ballText.setPosition(getPosition() - sf::Vector2f(4, 9));
+
+
+	if (owner == "8")
+	{
+		ballText.setFillColor(sf::Color::White);
+
+	}
+
+	target.draw(ballText);
 }
 
 void SampleBilliardBall::collideWithBall(SampleBilliardBall& other)
@@ -284,4 +315,19 @@ void SampleBilliardBall::collideWithBoard(SampleBilliardBoard& other)
 			}
 		}
 	}
+}
+
+void SampleBilliardBall::setOwner(std::string owner)
+{
+	this->owner = owner;
+}
+
+bool SampleBilliardBall::isOwner(std::string owner)
+{
+	return owner.compare(this->owner) == 0;
+}
+
+std::string SampleBilliardBall::getOwner(void)
+{
+	return owner;
 }

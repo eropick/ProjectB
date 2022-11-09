@@ -24,52 +24,34 @@ void SampleBilliardGameBall::setPlayable(bool playable)
 	this->playable = playable;
 }
 
-void SampleBilliardGameBall::setOwner(std::string owner)
-{
-	this->owner = owner;
-}
-
-bool SampleBilliardGameBall::isOwner(std::string owner)
-{
-	return owner.compare(this->owner) == 0;
-}
-
-std::string SampleBilliardGameBall::getOwner(void)
-{
-	return owner;
-}
 
 void SampleBilliardGameBall::render(sf::RenderTarget& target)
 {
-	// 공 형태 그림 
+	// 렌더링 윈도우에 원을 구성하는 버텍스를 그림 
 	target.draw(getVertices());
 	
-	// 9번~15번공은 줄무늬 입력
-	sf::RectangleShape rectangle(sf::Vector2f(19, 9));
-	rectangle.setFillColor(sf::Color::White);
-	rectangle.setPosition(getPosition() - sf::Vector2f(10, 4));
-	if(owner!="P")
-		if (stoi(owner) >= 9)
-			target.draw(rectangle);
 	// SampleGame에서는 각 공에 플레이어 문자 표시 
 	sf::Text ballText;
 	ballText.setFont(SampleGame::getFont());
 	ballText.setFillColor(sf::Color::Black);
-	ballText.setString(owner);
+	ballText.setString(getOwner());
 	ballText.setCharacterSize(13);
-	// 10 이상은 글자가 떙겨지므로 위치 다시 설정
-	if (owner != "P") {
-		if (stoi(owner)/10==1) //2자리수 이상
-			ballText.setPosition(getPosition() - sf::Vector2f(8, 10));
-		else
-			ballText.setPosition(getPosition() - sf::Vector2f(4, 9));
-	}
-	else
-		ballText.setPosition(getPosition() - sf::Vector2f(4, 9));
-   target.draw(ballText);
-   if (owner == "8")
-   {
-      ballText.setFillColor(sf::Color::White);
-      target.draw(ballText);
-   }
+	ballText.setPosition(getPosition() - sf::Vector2f(4, 9));
+	target.draw(ballText);
+}
+
+
+void SampleBilliardGameBall::setOwner(std::string owner)
+{
+	return SampleBilliardBall::setOwner(owner);
+}
+
+bool SampleBilliardGameBall::isOwner(std::string owner)
+{
+	return SampleBilliardBall::isOwner(owner);
+}
+
+std::string SampleBilliardGameBall::getOwner(void)
+{
+	return SampleBilliardBall::getOwner();
 }

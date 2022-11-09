@@ -35,6 +35,7 @@ void BilliardPocket::collide(SampleBilliardObject& other)
 //포켓과 공 충돌
 void BilliardPocket::collideWithBall(SampleBilliardBall& other)
 {
+
 	// 동일한 공 비교시 종료 
 	if (this == &other)
 	{
@@ -47,13 +48,20 @@ void BilliardPocket::collideWithBall(SampleBilliardBall& other)
 	// 두 공이 겹치는지 검사 
 	if (distanceBetween < getRadius()/1.5)  
 	{
-		putBall(other); //포켓에 공넣기
-		SampleBilliardGameBall* Ball = dynamic_cast<SampleBilliardGameBall*>(&other);
-		//닿으면 바로 넣어지지 않고 특정 비율 넘어가면 포켓에 넣는 것으로 판정
-		int size = Pocket.size();
-		other.setPosition(300,800-(2*size*Ball->getRadius())); //충돌한 공의 위치 지정
-		other.setVelocity(0, 0); 
-		setVelocity(0, 0); //포켓 속도0
+		if (typeid(other) == typeid(SampleBilliardGameBall)) { //파울인 경우
+			other.setPosition(700, 700);
+			other.setVelocity(0, 0);
+			setVelocity(0, 0); //포켓 속도 0
+		}
+		else {
+			putBall(other); //포켓에 공넣기
+			SampleBilliardBall* Ball = dynamic_cast<SampleBilliardBall*>(&other);
+			//닿으면 바로 넣어지지 않고 특정 비율 넘어가면 포켓에 넣는 것으로 판정
+			int size = Pocket.size();
+			other.setPosition(300, 800 - (2 * size * Ball->getRadius())); //충돌한 공의 위치 지정
+			other.setVelocity(0, 0);
+			setVelocity(0, 0); //포켓 속도0
+		}
 	}
 }
 
