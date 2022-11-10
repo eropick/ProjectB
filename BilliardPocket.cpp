@@ -4,8 +4,6 @@
 //정적변수
 vector<SampleBilliardObject*> BilliardPocket::Pocket;
 
-
-
 //소멸자.
 BilliardPocket::~BilliardPocket() {
 	for (SampleBilliardObject* obj : Pocket)
@@ -24,12 +22,7 @@ void BilliardPocket::collide(SampleBilliardObject& other)
 		collideWithBall(ball);
 	}
 
-	// 당구대와 충돌할 경우 
-	if (dynamic_cast<SampleBilliardBoard*>(&other) != nullptr)
-	{
-		SampleBilliardBoard& board = *dynamic_cast<SampleBilliardBoard*>(&other);
-		collideWithBoard(board);
-	}
+	//당구대 충돌은 없어도 됨.
 }
 
 //포켓과 공 충돌
@@ -61,43 +54,6 @@ void BilliardPocket::collideWithBall(SampleBilliardBall& other)
 			other.setPosition(300, 800 - (2 * size * Ball->getRadius())); //충돌한 공의 위치 지정
 			other.setVelocity(0, 0);
 			setVelocity(0, 0); //포켓 속도0
-		}
-	}
-}
-
-//당구대 충돌 재정의
-void BilliardPocket::collideWithBoard(SampleBilliardBoard& other)
-{
-	for (SampleBilliardBoard::Border border : other.getBorders())
-	{
-		sf::Vector2f p = getPosition();
-		sf::Vector2f s(border.getPoints()[0].position);
-		sf::Vector2f e = border.getPoints()[1].position;
-		sf::Vector2f ps = p - s;
-		sf::Vector2f se = e - s;
-
-		float lineLength = (e.x - s.x) * (e.x - s.x) + (e.y - s.y) * (e.y - s.y);
-		float t = ((ps.x * se.x) + (ps.y * se.y)) / lineLength;
-		sf::Vector2f st(s.x + t * se.x, s.y + t * se.y);
-
-		sf::Vector2f distance = p - st;
-		float distanceBetween = sqrtf((distance.x * distance.x) + (distance.y * distance.y));
-
-		sf::Vector2f normal = distance / distanceBetween;
-		float dotProductNormal = getVelocity().x * normal.x + getVelocity().y * normal.y;
-
-		sf::Vector2f tangential = sf::Vector2f(-normal.y, normal.x);
-		float dotProductTangential = getVelocity().x * tangential.x + getVelocity().y * tangential.y;
-
-		float overlap = distanceBetween - getRadius();
-		if (distanceBetween <= getRadius())
-		{
-			if (t > -0.f && t < 1.f)
-			{
-				setPosition(p.x - distance.x * overlap / distanceBetween, p.y - distance.y * overlap / distanceBetween);
-				setVelocity(-normal.x * dotProductNormal + tangential.x * dotProductTangential,
-					-normal.y * dotProductNormal + tangential.y * dotProductTangential);
-			}
 		}
 	}
 }

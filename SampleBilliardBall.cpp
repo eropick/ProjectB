@@ -3,7 +3,6 @@
 #include "BilliardPocket.h"
 #include "SampleGame.h"
 
-
 SampleBilliardBall::SampleBilliardBall(void) 
 	: SampleBilliardBall(sf::Vector2f(100, 100), 10, sf::Color::Red)
 {

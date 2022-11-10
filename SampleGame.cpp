@@ -4,20 +4,21 @@
 #include "BilliardPocket.h"
 #include "SampleBilliardObject.h"
 
+
 SampleGame::SampleGame(int width, int height, int fpsLimit)
 	:BaseGame(width, height, fpsLimit), isDraggingBall(false), draggedBall(nullptr)
 {
+
 	// SampleGame을 위한 인터페이스 생성 및 등록 
 
 	// SampleGame을 위한 당구대 생성 및 등록 
 	gameObjects.push_back(new SampleBilliardBoard());
 
 	// SampleGame을 위한 당구공 생성 및 등록 
-	
 	BilliardPocket* Pocket[6];
 	//포켓 x,y 좌표 한 번에 변경 가능하도록 해놨습니다.
-	float x[2] = { 593,1014 };
-	float y[3] = { 45,450,848 };
+	float x[2] = { 593,1007 };
+	float y[3] = { 45,450,850 };
 	sf::Vector2f PocketCord[6] = {
 	{x[0], y[0]},{x[0], y[1]},{x[0], y[2]},
 	{x[1], y[0]},{x[1], y[1]},{x[1], y[2]},
@@ -63,12 +64,24 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	//배열 초기화
 	for (int i = 0; i < 15; ++i) {
 		ball[i] = new SampleBilliardBall(Cord[i], 10, color[i]);
-		char Intstr[10];
-		_itoa(i+1, Intstr, 10); //정수를 문자열로
-		std::string str = Intstr;
-		ball[i]->setOwner(str);
+		ball[i]->setOwner(std::to_string(i+1)); 
 		gameObjects.push_back(ball[i]);
 	}
+
+	//플레이어 정보
+	int PlayerCnt = 2; //플레이어 수
+	srand(time(NULL));
+	//첫번째 턴 난수
+	int FirstTurn = rand() % PlayerCnt; 
+	for (int i = 0; i < 2; ++i) {
+		Player* p;
+		if(FirstTurn==i)
+			p = new Player(i+1, true);
+		else
+			p = new Player(i+1, false);
+		gameObjects.push_back(p);
+	}
+
 }
 
 
@@ -196,9 +209,6 @@ void SampleGame::render(sf::RenderTarget& target)
 		obj->render(target);
 	}
 
-	//게임 스코어
-	renderScore(target);
-
 	// 공을 드래그 하면 세기 표시 (길이 및 색)
 	renderDragpower(target);
 	
@@ -231,45 +241,3 @@ void SampleGame::renderDragpower(sf::RenderTarget& target)
 	}
 }
 
-void SampleGame::renderScore(sf::RenderTarget& target) {
-	// 점수판
-	sf::Text P1_score;
-	sf::Text P2_score;
-	sf::Text ScoreText;
-	
-	//폰트 설정
-	P1_score.setFont(getFont());
-	P2_score.setFont(getFont());
-	ScoreText.setFont(getFont());
-
-	//색
-	P1_score.setFillColor(sf::Color::White);
-	P2_score.setFillColor(sf::Color::White);
-	ScoreText.setFillColor(sf::Color::Cyan);
-
-	//크기
-	P1_score.setCharacterSize(80);
-	P2_score.setCharacterSize(80);
-	ScoreText.setCharacterSize(50);
-
-	P1_score.setString("0");
-	P2_score.setString("0");
-	
-	P1_score.setOutlineColor(sf::Color::Cyan);
-	P2_score.setOutlineColor(sf::Color::Cyan);
-
-	P1_score.setOutlineThickness(1.f);
-	P2_score.setOutlineThickness(1.f);
-
-	ScoreText.setString("player1 | player2");
-	ScoreText.setOutlineColor(sf::Color::White);
-	ScoreText.setOutlineThickness(1.f);
-
-	P1_score.setPosition(120.f, 250.f);
-	P2_score.setPosition(300.f, 250.f);
-	ScoreText.setPosition(70.f, 200.f);
-
-	target.draw(P1_score);
-	target.draw(P2_score);
-	target.draw(ScoreText);
-}

@@ -1,7 +1,7 @@
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS //헤더에 이거 추가해야 아마 itoi쓸수 있을거에요
 #include <iostream> 
 #include <vector> 
+#include <string>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>
@@ -13,8 +13,10 @@
 #include <SFML/Window.hpp>
 
 #include "BaseGame.h"
+#include "Player.h"
 #include "SampleBilliardObject.h"
 #include "SampleBilliardGameBall.h"
+
 
 class SampleGame : public BaseGame
 {
@@ -41,8 +43,6 @@ protected:
 private:
 	// Sample Game 에서 공을 쏘는 강도 표시
 	void renderDragpower(sf::RenderTarget& target);
-	// Sample Game 에서의 점수판
-	void renderScore(sf::RenderTarget& target);
 
 private:
 	// Sample Game에서 관리하는 게임 오브젝트들 (공, 당구대 등) 

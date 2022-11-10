@@ -23,6 +23,5 @@ public:
 
 private:
 	void collideWithBall(SampleBilliardBall& other);
-	void collideWithBoard(SampleBilliardBoard& other);
 	static vector<SampleBilliardObject*> Pocket; //정적 포켓
 };
