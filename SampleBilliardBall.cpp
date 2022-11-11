@@ -169,8 +169,8 @@ void SampleBilliardBall::update(float timeElapsed)
 	// 참고: https://ko.khanacademy.org/computing/computer-programming/programming-natural-simulations/programming-angular-movement/a/pointing-towards-movement
 	setAngle(atan2f(velocity.y, velocity.x) * 180.f / float(M_PI));
 
-	// 속도가 0.1보다 작으면 마찰을 가정하여 0으로 지정 
-	if (std::abs(velocity.x) < 0.1f || std::abs(velocity.y) < 0.1f)
+	// 속도가 0.75보다 작으면 마찰을 가정하여 0으로 지정 
+	if (std::abs(velocity.x) < 0.75f || std::abs(velocity.y) < 0.75f)
 	{
 		velocity = sf::Vector2f(0.f, 0.f);
 	}

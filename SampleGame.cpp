@@ -12,9 +12,11 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	// SampleGame을 위한 인터페이스 생성 및 등록 
 
 	// SampleGame을 위한 당구대 생성 및 등록 
-	gameObjects.push_back(new SampleBilliardBoard());
+	gameObjects.push_back(new SampleBilliardBoard()); //0번
 
 	// SampleGame을 위한 당구공 생성 및 등록 
+
+	//포켓 1~6번
 	BilliardPocket* Pocket[6];
 	//포켓 x,y 좌표 한 번에 변경 가능하도록 해놨습니다.
 	float x[2] = { 593,1007 };
@@ -25,16 +27,18 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	};
 	for (int i = 0; i < 6; ++i) {
 		Pocket[i] = new BilliardPocket(PocketCord[i], 12, sf::Color::Black);
+		Pocket[i]->setOwner("0");
 		gameObjects.push_back(Pocket[i]);
 	}
-	//플레이어볼
+
+	//플레이어볼 7번
 	SampleBilliardGameBall* PlayerBall =
 		new SampleBilliardGameBall(sf::Vector2f(800, 500), 10, sf::Color::White);
 	PlayerBall->setOwner("P");
 	PlayerBall->setPlayable(true);
 	gameObjects.push_back(PlayerBall);
 
-	//게임볼
+	//게임볼 8~22번까지 
 	SampleBilliardBall* ball[15];
 	typedef sf::Color C;
 
@@ -75,13 +79,14 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	int FirstTurn = rand() % PlayerCnt; 
 	for (int i = 0; i < 2; ++i) {
 		Player* p;
-		if(FirstTurn==i)
+		if(FirstTurn==i){
 			p = new Player(i+1, true);
-		else
+		}
+		else{
 			p = new Player(i+1, false);
-		gameObjects.push_back(p);
+		}
+		Players.push_back(p);
 	}
-
 }
 
 
@@ -92,6 +97,9 @@ SampleGame::~SampleGame(void)
 	for (SampleBilliardObject* obj : gameObjects)
 	{
 		delete obj;
+	}
+	for (Player* p : Players) {
+		delete p;
 	}
 }
 
@@ -134,6 +142,10 @@ void SampleGame::handle(sf::Event& ev)
 		{
 			for (SampleBilliardObject* obj : gameObjects)
 			{
+				//공이 움직이고 있는 상태라면 버튼 누름 이벤트발생X
+				if (Players[0]->isPhase() == 1 || Players[1]->isPhase() == 1)
+					continue;
+
 				// SampleBilliardBall의 인스턴스가 아닌 경우 pass
 				SampleBilliardGameBall* gameBall = dynamic_cast<SampleBilliardGameBall*>(obj);
 				if (gameBall == nullptr)
@@ -171,10 +183,171 @@ void SampleGame::handle(sf::Event& ev)
 // 상속 클래스는 반드시 게임 상태 갱신 함수 구현해야 함 
 void SampleGame::update(void)
 {
+	// 플레이어 서로의 주소 추가
+	if (&(Players[0]->getNextP()) == nullptr) Players[0]->setNextP(*Players[1]);
+	if (&(Players[1]->getNextP()) == nullptr) Players[1]->setNextP(*Players[0]);
+	
+	//필요한 공
+	SampleBilliardGameBall* playerBall = nullptr;
+	SampleBilliardObject* eightBall = nullptr;
+
 	// 게임 오브젝트 업데이트 
 	for (SampleBilliardObject* obj : gameObjects)
 	{
 		obj->update(clock.getElapsedTime().asSeconds());
+		if (playerBall==nullptr)
+			playerBall = dynamic_cast<SampleBilliardGameBall*>(obj);
+		if (eightBall == nullptr) {
+			SampleBilliardBall* eight = dynamic_cast<SampleBilliardBall*>(obj);
+			if (eight!=nullptr&&eight->getOwner().compare("8") == 0)
+				eightBall = obj;
+		}
+	}
+	if (playerBall == nullptr) exit(-1);  //오브젝트 업데이트 후에 nullptr을 갖는다면 종료
+
+	//플레이어 업데이트
+	for (Player* p : Players)
+	{
+		if (p->isWin() == true) break;
+		//플레이어 볼의 상태에 따른 작업
+		if (p->isTurn()) { //플레이어 턴일 때
+			switch (p->isPhase()) {
+			case 0: //공을 아직 안침
+			{
+				if (playerBall->getVelocity() == sf::Vector2f(0, 0)) {}
+				else //공의 속도가 변했을 때
+					p->setPhase(1); //공 친 상태로 변경
+			}
+			break;
+			case 1: //공을 침
+			{
+				int check = 0;
+				for (SampleBilliardObject* obj : gameObjects) {
+					//포켓이 아닌 목적공들의 속도가 모두 0인지 구한다.
+					if (dynamic_cast<SampleBilliardBall*>(obj) != nullptr
+						&& dynamic_cast<BilliardPocket*>(obj) == nullptr) {
+						SampleBilliardBall& Ball = *dynamic_cast<SampleBilliardBall*>(obj);
+						if (Ball.getVelocity() != sf::Vector2f(0.f, 0.f))
+							check = 1;
+					}
+					if (check == 1) break; //하나라도 속도가 0이 아니라면
+				}
+				if (check == 0) //속도가 0이라면
+					p->setPhase(-1); //친 후의 상태로 변경
+			}
+			break;
+			case -1: //공을 치고 정지
+			{
+				//포켓 크기의 변화가 있다면
+				if (BilliardPocket::getSizePocket() != Player::getSizePocket()) {
+					//이번 턴에 들어간 공의 수를 구함.
+					int DiffSize = BilliardPocket::getSizePocket() - Player::getSizePocket();
+					
+					if (BilliardPocket::InPocket(*eightBall) >= 0) { //8번공이 들어간 경우
+						if (BilliardPocket::InPocket(*playerBall) >= 0){ //플레이어 볼이 들어간 경우
+							p->yourLose(true); //무조건 패배
+						}
+						else {
+							if (p->getBallType() <= 0) { //BallType이 미정이라면 패배
+								p->yourLose(true);
+							}
+							else if(BilliardPocket::InPocket(*eightBall)==
+								BilliardPocket::getSizePocket()-1)//8번공이 마지막 요소일 때 
+							{
+								//플레이어의 모든 목적볼을 넣은 경우
+								if (p->getBallType() == 1&& BilliardPocket::getCntSolids()==7)
+									p->yourWin(true); //승리
+								else if (p->getBallType() == 9 && BilliardPocket::getCntStripes()==7)
+									p->yourWin(true); //승리
+								else //목적공을 못넣은 경우
+									p->yourLose(true);
+							}
+							else //8번공이 마지막 요소가 아닌 경우 패배
+								p->yourLose(true);
+						}
+					}
+					else if (BilliardPocket::InPocket(*playerBall) >= 0) { //8번공 제외 플레이어 볼이 들어간 경우
+						p->setPhase(0);
+						p->setTurn(false); //턴종료
+						p->getNextP().setTurn(true); //다음 플레이어 턴 
+						playerBall->setPosition(800, 500); //플레이어볼의 포지션 정하기
+						BilliardPocket::outBall(BilliardPocket::InPocket(*playerBall)); //흰공을 포켓에서 꺼냄
+						p->setScore(stoi(p->getScore()) + (DiffSize - 1)); //흰공 뺀 숫자만큼 득점.
+						Player::setSizePocket(BilliardPocket::getSizePocket()); //포켓 크기 갱신
+
+						if (p->getBallType() == -1) { //브레이크 샷 인경우 
+							p->setBallType(0); //미정 상태로 변경
+							p->getNextP().setBallType(0); 	
+						}
+						else if (p->getBallType() == 0&&DiffSize>=2) { //미정 상태인 경우,플레이어볼 포함 2개이상
+							//공이 몇 개이고 어떤 종류가 들어갔는지 확인
+							int str = 0;
+							int sol = 0;
+							for (int i = BilliardPocket::getSizePocket() - 1; i >= DiffSize - 2; --i) {
+								if (stoi(BilliardPocket::BallRef(i).getOwner()) > 8)
+									str++;
+								else
+									sol++;
+							}
+							if (str == sol) {} //두 숫자가 같은 경우
+							else {
+								if (stoi(BilliardPocket::BallRef(BilliardPocket::getSizePocket() - 1).getOwner()) > 8) {
+									p->setBallType(9); //stripes;
+									p->getNextP().setBallType(1); //solids
+								}
+								else {
+									p->setBallType(1); 
+									p->getNextP().setBallType(9); 
+								}
+							}
+						}
+					}
+					else { //8과 플레이어 볼을 제외한 목적구가 들어갔다면
+						if (p->getBallType() == -1) { //브레이크 샷 인경우 
+							p->setBallType(0); //미정 상태로 변경
+							p->getNextP().setBallType(0); 
+						}
+						else if (p->getBallType() == 0) { //미정 상태인 경우
+							//공이 몇 개이고 어떤 종류가 들어갔는지 확인
+							int str = 0;
+							int sol = 0;
+							for (int i = BilliardPocket::getSizePocket() - 1; i >= DiffSize - 1; --i) {
+								if (stoi(BilliardPocket::BallRef(i).getOwner()) > 8)
+									str++;
+								else
+									sol++;
+							}
+							if (str == sol){} //두 숫자가 같은 경우
+							else {
+								if (stoi(BilliardPocket::BallRef(BilliardPocket::getSizePocket() - 1).getOwner()) > 8) {
+									p->setBallType(9); //stripes;
+									p->getNextP().setBallType(1); //solids
+								}
+								else {
+									p->setBallType(1);
+									p->getNextP().setBallType(9);
+								}
+							}
+						}
+						p->setPhase(0);
+						//턴유지
+						p->setScore(stoi(p->getScore()) + DiffSize); //들어간 수만큼 득점
+						Player::setSizePocket(BilliardPocket::getSizePocket()); //포켓 공의 개수 갱신
+					}
+				}
+				else { //변화가 없다면
+					if (p->getBallType() == -1) { //브레이크 샷 인경우 
+						p->setBallType(0); //미정 상태로 변경
+						p->getNextP().setBallType(0);
+					}
+					p->setPhase(0); //전 상태로 돌림
+					p->setTurn(false); //턴 종료
+					p->getNextP().setTurn(true); //다음 플레이어에게 턴넘김
+				}
+			}
+			break;
+			}
+		}
 	}
 
 	// 게임 오브젝트 충돌 검사
@@ -186,7 +359,7 @@ void SampleGame::update(void)
 		}
 	}
 
-	// 끌었다가 놓은 공에 속도를 지정하고 표시 해제 
+	// 끌었다가 놓은 공에 속도를 지정하고 표시 해제 => 이미 끌어서 놓은 상태를 의미
 	if (!isDraggingBall && draggedBall != nullptr)
 	{
 		draggedBall->setVelocity(draggedBall->getPosition().x - mouseXY.x, draggedBall->getPosition().y - mouseXY.y);
@@ -203,6 +376,12 @@ void SampleGame::render(sf::RenderTarget& target)
 	// 화면 클리어 
 	window->clear(sf::Color(75, 103, 163));
 
+	// 플레이어 정보 렌더링
+	for (Player* p : Players)
+	{
+		p->render(target);
+	}
+
 	// 게임 오브젝트 렌더링 
 	for (SampleBilliardObject* obj : gameObjects)
 	{
@@ -211,9 +390,9 @@ void SampleGame::render(sf::RenderTarget& target)
 
 	// 공을 드래그 하면 세기 표시 (길이 및 색)
 	renderDragpower(target);
-	
+
 	// 게임 UI 렌더링
-	
+
 }
 
 void SampleGame::renderDragpower(sf::RenderTarget& target)
