@@ -17,11 +17,11 @@ SampleBilliardBoard::SampleBilliardBoard(void)
 		외부 x,y좌표
 		공 반경만 수정해서 사용가능합니다.
 	*/
-	float Radius = 10.f;
+	float Radius = 20.f;
 	Radius = Radius + 5.f; //공의 반경 + 여분
 	
 	//내부 경계
-	float inX[2] = { 602.5f,990.f };
+	float inX[2] = { 602.5f,992.f };
 	float inY[2] = { 55.f,840.f };
 	typedef SampleBilliardBoard::Border B;
 	B inLineTop(inX[0]+Radius, inY[0], inX[1]- Radius, inY[0]);
@@ -43,11 +43,11 @@ SampleBilliardBoard::SampleBilliardBoard(void)
 	B outLineRight(outX[1], outY[0], outX[1], outY[1]);
 
 	//포켓 경계 :T(top), L(left),R(right),B(bottom) ,M(mid), O(out), I(in)
-	B TLOI_Up(inX[0] + Radius,outY[0], inX[0] + Radius, inY[0]); // 위쪽 라인 왼쪽 부분 경계 위 |
-	B TLOI_Down(outX[0], inY[0] + Radius, inX[0], inY[0] + Radius); // 위쪽 라인 왼쪽 부분 경계 아래 -
+	B TLOI_Up(outX[0] + Radius,outY[0], inX[0] + Radius, inY[0]); // 위쪽 라인 왼쪽 부분 경계 위 |
+	B TLOI_Down(outX[0], outY[0] + Radius, inX[0], inY[0] + Radius); // 위쪽 라인 왼쪽 부분 경계 아래 -
 	
-	B TROI_Up(inX[1] - Radius, outY[0], inX[1] - Radius, inY[0]); // 위쪽 라인 오른쪽 부분 경계 위 |
-	B TROI_Down(inX[1], inY[0] + Radius, outX[1], inY[0] + Radius); // 위쪽 라인 오른쪽 부분 경계 아래 -
+	B TROI_Up(outX[1] - Radius, outY[0], inX[1] - Radius, inY[0]); // 위쪽 라인 오른쪽 부분 경계 위 |
+	B TROI_Down(inX[1], inY[0] + Radius, outX[1], outY[0] + Radius); // 위쪽 라인 오른쪽 부분 경계 아래 -
 
 	B MLOI_Up(outX[0], ((inY[1] - inY[0]) / 2) + inY[0] - Radius, 
 		inX[0], ((inY[1] - inY[0]) / 2) + inY[0] - Radius); // 왼쪽 라인 가운데 위쪽 -
@@ -59,11 +59,11 @@ SampleBilliardBoard::SampleBilliardBoard(void)
 	B MROI_Down(inX[1], ((inY[1] - inY[0]) / 2) + inY[0] + Radius,
 		outX[1], ((inY[1] - inY[0]) / 2) + inY[0] + Radius); // 오른쪽 라인 가운데 아래쪽 -
 
-	B BLOI_Up(outX[0], inY[1] - Radius, inX[0], inY[1] - Radius); // 아래쪽 라인 왼쪽 부분 경계 위 -
-	B BLOI_Down(inX[0] + Radius, inY[1], inX[0] + Radius, outY[1]); // 위쪽 라인 왼쪽 부분 경계 아래 |
+	B BLOI_Up(outX[0], outY[1] - Radius, inX[0], inY[1] - Radius); // 아래쪽 라인 왼쪽 부분 경계 위 -
+	B BLOI_Down(inX[0] + Radius, inY[1], outX[0] + Radius, outY[1]); // 위쪽 라인 왼쪽 부분 경계 아래 |
 
-	B BROI_Up(inX[1], inY[1] - Radius,outX[1], inY[1] - Radius); // 위쪽 라인 오른쪽 부분 경계 위 -
-	B BROI_Down(inX[1] - Radius, inY[1], inX[1] - Radius, outY[1]); // 위쪽 라인 오른쪽 부분 경계 아래 |
+	B BROI_Up(inX[1], inY[1] - Radius,outX[1], outY[1] - Radius); // 위쪽 라인 오른쪽 부분 경계 위 -
+	B BROI_Down(inX[1] - Radius, inY[1], outX[1] - Radius, outY[1]); // 위쪽 라인 오른쪽 부분 경계 아래 |
 
 	borderLines.push_back(inLineTop);
 	borderLines.push_back(inLineBottom);

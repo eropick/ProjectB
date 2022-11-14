@@ -14,13 +14,22 @@
 #include "SampleBilliardBoard.h"
 #include "SampleBilliardGameBall.h"
 
+#define BREAKSHOT -1
+#define UNKNOWN 0
+#define SOLIDS 1
+#define STRIPES 9
+
+enum {
+	STOP=-1,BASIC,MOVE
+};
+
 class Player : public SampleBilliardObject{
 public:
 	Player();
 	Player(int num,bool turn);
 	virtual ~Player(void);
 
-	void update(SampleBilliardGameBall& Ball);
+	void update(SampleBilliardGameBall& Ball, SampleBilliardObject& eightBall, int V);
 
 	// Sample Game의 객체들은 반드시 상태 갱신 함수 구현해야 함 
 	virtual void update(float timeElapsed);
