@@ -6,8 +6,8 @@
 
 Player::Player() : Player(0,false){}
 
-Player::Player(int num,bool turn) : turn(turn), Phase(0)
-,score(0), win(false), ballType(-1),PlayerNum(num) {
+Player::Player(int num,bool turn) : turn(turn), Phase(BASIC)
+,score(0), win(false), ballType(BREAKSHOT),PlayerNum(num) {
 	NextP = nullptr;
 }
 
@@ -293,15 +293,15 @@ bool Player::isWin() const {
 
 void Player::setBallType(int type) {
 	if (0 < type && type < 8) {
-		ballType = SOLIDS; //solids
+		ballType = SOLIDS; 
 	}
 	else if (type > 8) {
-		ballType = STRIPES; //stripes
+		ballType = STRIPES;
 	}
 	else if (type == 0)
-		ballType = UNKNOWN; //미정
+		ballType = UNKNOWN;
 	else
-		ballType = BREAKSHOT; //초기
+		ballType = BREAKSHOT;
 }
 int Player::getBallType() const {
 	return ballType;
