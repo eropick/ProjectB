@@ -65,15 +65,12 @@ public:
 	void setOwner(std::string owner);
 	bool isOwner(std::string owner);
 	std::string getOwner(void);
-
 private:
 	// 공과 충돌한 경우 
 	void collideWithBall(SampleBilliardBall& other);
 
 	// 당구대와 충돌한 경우 
 	void collideWithBoard(SampleBilliardBoard& other);
-
-
 
 private:
 	sf::Vector2f position;
@@ -88,4 +85,5 @@ private:
 	sf::Color color;
 
 	std::string owner;
+
 };

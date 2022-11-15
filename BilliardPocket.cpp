@@ -21,14 +21,12 @@ void BilliardPocket::collide(SampleBilliardObject& other)
 		SampleBilliardBall& ball = *dynamic_cast<SampleBilliardBall*>(&other);
 		collideWithBall(ball);
 	}
-
 	//당구대 충돌은 없어도 됨.
 }
 
 //포켓과 공 충돌
 void BilliardPocket::collideWithBall(SampleBilliardBall& other)
 {
-
 	// 동일한 공 비교시 종료 
 	if (this == &other)
 	{
@@ -39,6 +37,7 @@ void BilliardPocket::collideWithBall(SampleBilliardBall& other)
 	float distanceBetween = (sqrtf((distance.x * distance.x) + (distance.y * distance.y)));
 
 	// 두 공이 겹치는지 검사 
+	//닿으면 바로 넣어지지 않고 특정 비율 넘어가면 포켓에 넣는 것으로 판정
 	if (distanceBetween < getRadius()/1.5)  
 	{
 		// 겹치는 정도 계산 
@@ -59,14 +58,25 @@ void BilliardPocket::collideWithBall(SampleBilliardBall& other)
 		float m1 = (2.f * other.getMass() * dotProductNormal2 + dotProductNormal1 * (getMass() - other.getMass())) / (getMass() + other.getMass());
 		float m2 = (2.f * getMass() * dotProductNormal1 + dotProductNormal2 * (other.getMass() - getMass())) / (getMass() + other.getMass());
 		
-		//흰색공도 일단 넣어둠.
-		putBall(other); //포켓에 공넣기
+
+		putBall(other); //포켓에 공넣기			
 		SampleBilliardBall* Ball = dynamic_cast<SampleBilliardBall*>(&other);
-		//닿으면 바로 넣어지지 않고 특정 비율 넘어가면 포켓에 넣는 것으로 판정
-		int size = Pocket.size();
-		other.setPosition(300, 800 - (2 * size * Ball->getRadius())); //충돌한 공의 위치 지정
-		other.setVelocity(dotProductTangential2 * tangential + m2 * normal);
-		//other.setVelocity(0, 0);
+		int Cnt;
+		//어떤 플레이어가 넣었는지 확인
+		if(Player::WhoisTurn().getPlayerNum()==1) { //Player1
+			Cnt = Player::WhoisTurn().getPutBallCnt(); //플레이어가 넣은 공의 개수를 가져옴
+			other.setPosition(50 + (2 * Cnt * Ball->getRadius()), 500); //충돌한 공의 위치 지정
+			if (typeid(other) != typeid(SampleBilliardGameBall)) //흰공이 아니면
+				Player::WhoisTurn().setPutBallCnt(Cnt+1); //넣은 공으로 추가
+		}
+		else { //Player2
+			Cnt = Player::WhoisTurn().getPutBallCnt(); //플레이어가 넣은 공의 개수를 가져옴
+			other.setPosition(50 + (2 * Cnt * Ball->getRadius()), 600); //충돌한 공의 위치 지정
+			if (typeid(other) != typeid(SampleBilliardGameBall)) //흰공이 아니면
+				Player::WhoisTurn().setPutBallCnt(Cnt + 1); //넣은 공으로 추가
+		}
+		//other.setVelocity(dotProductTangential2 * tangential + m2 * normal);
+		other.setVelocity(0, 0);
 		setVelocity(0, 0); //포켓 속도0
 	}
 }

@@ -3,16 +3,24 @@
 #include "BilliardPocket.h"
 #include "SampleGame.h"
 #include "Player.h"
+#include "ScoreBoard.h"
+
+
+//정적 멤버
+Player* Player::TurnPlayer = nullptr;
 
 Player::Player() : Player(0,false){}
 
-Player::Player(int num,bool turn) : turn(turn), Phase(BASIC)
+Player::Player(int num,bool turn) : Phase(BASIC)
 ,score(0), win(false), ballType(BREAKSHOT),PlayerNum(num) {
+	setTurn(turn);
+	setPutBallCnt(0);
 	NextP = nullptr;
 }
 
 Player::~Player(void) {
 	NextP = nullptr;
+	TurnPlayer = nullptr;
 	//NextP는 SampleGame에서 소멸됨
 }
 
@@ -56,7 +64,6 @@ void Player::update(SampleBilliardGameBall& playerBall,SampleBilliardObject& eig
 			if (BilliardPocket::getSizePocket() != Player::getSizePocket()) {
 				//이번 턴에 들어간 공의 수를 구함.
 				int DiffSize = BilliardPocket::getSizePocket() - Player::getSizePocket();
-
 				if (BilliardPocket::InPocket(eightBall) >= 0) { //8번공이 들어간 경우
 					if (BilliardPocket::InPocket(playerBall) >= 0) { //플레이어 볼이 들어간 경우
 						yourLose(true); //무조건 패배
@@ -82,7 +89,7 @@ void Player::update(SampleBilliardGameBall& playerBall,SampleBilliardObject& eig
 				}
 				else if (BilliardPocket::InPocket(playerBall) >= 0) { //8번공 제외 플레이어 볼이 들어간 경우
 					Phase = BASIC;
-					turn = false; //턴종료
+					setTurn(false); //턴종료
 					getNextP().setTurn(true); //다음 플레이어 턴 
 					playerBall.setPosition(800, 500); //플레이어볼의 포지션 정하기
 					BilliardPocket::outBall(BilliardPocket::InPocket(playerBall)); //흰공을 포켓에서 꺼냄
@@ -114,9 +121,10 @@ void Player::update(SampleBilliardGameBall& playerBall,SampleBilliardObject& eig
 							}
 						}
 					}
-					else if (ballType != UNKNOWN)
+					else if (ballType != UNKNOWN) {
 						//공 타입이 정해진 경우
 						setScore(stoi(getScore()) + (DiffSize - 1)); //흰공 뺀 숫자만큼 득점.
+					}
 				}
 				else { //8과 플레이어 볼을 제외한 목적구가 들어갔다면
 					setPhase(BASIC);
@@ -247,11 +255,22 @@ void Player::render(sf::RenderTarget& target) {
 			target.draw(TurnText);
 	}
 	target.draw(BallText);
+
 }
 
+int Player::getPlayerNum() const {
+	return PlayerNum;
+}
+
+//턴인 플레이어 반환
+Player& Player::WhoisTurn() {
+	return *TurnPlayer;
+}
 
 void Player::setTurn(bool turn) {
 	this->turn = turn;
+	if(turn) //턴이라면
+		TurnPlayer = this; //해당 플레이어를 턴인 플레이어로 설정
 }
 bool Player::isTurn() const {
 	return turn;
@@ -260,6 +279,7 @@ bool Player::isTurn() const {
 void Player::setPhase(int Phase) {
 	this->Phase = Phase;
 }
+
 int Player::isPhase() const {
 	return Phase;
 }
@@ -278,13 +298,13 @@ void Player::setScore(std::string param) {
 
 void Player::yourWin(bool win) {
 	Phase = 0;
-	turn = true;
+	setTurn(true);
 	this->win = win;
 }
 
 void Player::yourLose(bool lose) {
 	Phase = 0;
-	turn = false;
+	setTurn(false);
 	getNextP().yourWin(true); //해당 플레이어 패배 == 상대 플레이어 승리
 }
 bool Player::isWin() const {
@@ -307,11 +327,17 @@ int Player::getBallType() const {
 	return ballType;
 }
 
+void Player::setPutBallCnt(int num) {
+	PutBallCnt = num;
+}
+int Player::getPutBallCnt() const {
+	return PutBallCnt;
+}
 
 void Player::setNextP(Player& p) {
 	NextP = &p;
 }
-
 Player& Player::getNextP()const{
 	return *NextP;
 }
+

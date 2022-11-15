@@ -16,6 +16,7 @@
 #include "Player.h"
 #include "SampleBilliardObject.h"
 #include "SampleBilliardGameBall.h"
+#include "ScoreBoard.h"
 
 
 class SampleGame : public BaseGame
@@ -60,6 +61,10 @@ private:
 	// 공 발사용 
 	bool isDraggingBall;
 	SampleBilliardGameBall* draggedBall;
+
+	//공 테스트용
+	bool isCatchingBall;
+	SampleBilliardBall* catchedBall;
 
 	// 게임 전역 폰트 
 	static sf::Font* font;

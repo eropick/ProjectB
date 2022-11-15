@@ -3,6 +3,7 @@
 #include "SampleBilliardGameBall.h"
 #include "BilliardPocket.h"
 #include "SampleBilliardObject.h"
+#include "ScoreBoard.h"
 
 SampleGame::SampleGame(int width, int height, int fpsLimit)
 	:BaseGame(width, height, fpsLimit), isDraggingBall(false), draggedBall(nullptr)
@@ -12,10 +13,13 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	// SampleGame을 위한 당구대 생성 및 등록 
 	gameObjects.push_back(new SampleBilliardBoard()); //0번
 
+	// 점수판 생성 및 등록 => 오브젝트 렌더링이 추가한 순서라서 먼저해야 됨.
+	gameObjects.push_back(new ScoreBoard());
+
 	//포켓 1~6번
 	BilliardPocket* Pocket[6];
 	//포켓 x,y 좌표 한 번에 변경 가능하도록 해놨습니다.
-	float x[2] = { 595,1002 };
+	float x[2] = { 595,1002 }; 
 	float y[3] = { 48,447,850 };
 
 	sf::Vector2f PocketCord[6] = {
@@ -29,7 +33,7 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	}
 
 	// SampleGame을 위한 당구공 생성 및 등록 
-	
+
 	//플레이어볼
 	SampleBilliardGameBall* PlayerBall =
 		new SampleBilliardGameBall(sf::Vector2f(800, 500), 10, sf::Color::White);
@@ -74,10 +78,10 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	//플레이어 정보
 	int PlayerCnt = 2; //플레이어 수
 	srand(time(NULL));
+	Player* p;
 	//첫번째 턴 난수
 	int FirstTurn = rand() % PlayerCnt; 
 	for (int i = 0; i < 2; ++i) {
-		Player* p;
 		if(FirstTurn==i){
 			p = new Player(i+1, true);
 		}
@@ -87,7 +91,6 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 		Players.push_back(p);
 	}
 }
-
 
 SampleGame::~SampleGame(void)
 {
@@ -168,12 +171,41 @@ void SampleGame::handle(sf::Event& ev)
 				isDraggingBall = true;
 			}
 		}
+		//강제로 공을 포켓에 넣는 기능 테스트용 
+		else if(ev.mouseButton.button == sf::Mouse::Right) {
+			for (SampleBilliardObject* obj : gameObjects)
+			{
+
+				// SampleBilliardBall의 인스턴스가 아닌 경우 pass
+				SampleBilliardBall* gameBall = dynamic_cast<SampleBilliardBall*>(obj);
+				if (gameBall == nullptr)
+				{
+					continue;
+				}
+
+				// 커서가 공의 내부가 아닌 경우 pass 
+				if ((std::powf(mouseXY.x - gameBall->getPosition().x, 2.f)
+					+ std::powf(mouseXY.y - gameBall->getPosition().y, 2.f))
+					> gameBall->getRadius() * gameBall->getRadius())
+				{
+					continue;
+				}
+
+				//잡은 공 임시 저장 
+				catchedBall = gameBall;
+				isCatchingBall = true;
+			}
+		}
 		break;
 	case sf::Event::MouseButtonReleased:
 		// 마우스 버튼 뗌 이벤트 
 		if (ev.mouseButton.button == sf::Mouse::Left && isDraggingBall)
 		{
 			isDraggingBall = false;
+		}
+		//테스트 코드
+		else if (ev.mouseButton.button == sf::Mouse::Right && isCatchingBall) { //잡혀있다면
+			isCatchingBall = false;
 		}
 		break;
 	}
@@ -192,7 +224,7 @@ void SampleGame::update(void)
 	
 	//모든 공의 속도
 	int Velocity = 0;
-
+	
 	// 게임 오브젝트 업데이트 
 	for (SampleBilliardObject* obj : gameObjects)
 	{
@@ -218,7 +250,7 @@ void SampleGame::update(void)
 	//오브젝트 업데이트 후에 값이 없으면 종료
 	if (playerBall == nullptr|| eightBall == nullptr) exit(-1);  
 
-	//플레이어 업데이트
+	//플레이어 업데이트, 점수판 업데이트
 	for (Player* p : Players)
 	{
 		p->update(*playerBall, *eightBall, Velocity);
@@ -238,6 +270,13 @@ void SampleGame::update(void)
 	{
 		draggedBall->setVelocity(draggedBall->getPosition().x - mouseXY.x, draggedBall->getPosition().y - mouseXY.y);
 		draggedBall = nullptr;
+	}
+
+	//플레이어 볼의 속도와 잡힌 공을 포켓위치로 넣어버림.
+	if (!isCatchingBall && catchedBall != nullptr) {
+		playerBall->setVelocity(playerBall->getVelocity().x+5, playerBall->getVelocity().y+5);
+		catchedBall->setPosition(595, 447);
+		catchedBall = nullptr;
 	}
 
 	// 다음 단위 시간을 위해 초기화 
@@ -266,7 +305,6 @@ void SampleGame::render(sf::RenderTarget& target)
 	renderDragpower(target);
 
 	// 게임 UI 렌더링
-
 }
 
 void SampleGame::renderDragpower(sf::RenderTarget& target)

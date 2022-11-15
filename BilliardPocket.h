@@ -1,7 +1,9 @@
 #pragma once
 #include <cmath>
-#include "SampleBilliardBall.h"
 #include <vector>
+#include "SampleBilliardBall.h"
+#include "Player.h"
+
 
 using std::vector;
 
