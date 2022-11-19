@@ -12,7 +12,8 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	system("cls");
 	std::cout << "[Log]" << std::endl;
 	std::cout << "Start Game" << std::endl;
-	
+	srand(time(NULL)); 
+
 	// 테스트 코드 변수 초기화
 	isCatchingBall = false;
 	catchedBall = nullptr;
@@ -43,9 +44,16 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 
 	// SampleGame을 위한 당구공 생성 및 등록 
 
+	//1번공 기준 좌표
+	sf::Vector2f one = { 800,300 };
+	//반경
+	float R = 12;
+	float Sqr3 = sqrt(3); //루트3
+
+
 	//플레이어볼
 	SampleBilliardGameBall* PlayerBall =
-		new SampleBilliardGameBall(sf::Vector2f(800, 500), 10, sf::Color::White);
+		new SampleBilliardGameBall(sf::Vector2f(one.x, one.y+300), R, sf::Color::White);
 	PlayerBall->setOwner("P");
 	PlayerBall->setPlayable(true);
 	gameObjects.push_back(PlayerBall);
@@ -65,28 +73,52 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
     C::Color(0,0,128), C::Red,C::Color(77,55,123),
     C::Color(255,165,0), C::Green,  C::Color(111, 79, 48),
 	};
+
 	//공 좌표 매핑
 	//1번은 맨 앞에, 8번은 가운데
     //2번과 3번은 양쪽 끝에
     //1번 다음 배열은 띠공-띠공
     //중간배열은 색꽁-띠공 번갈아가면서
+
+	std::vector<int> sol = { 1,2,3,4,5,6 }; 
+	std::vector<int> str = { 8,9,10,11,12,13,14 };
+
 	sf::Vector2f Cord[15] =
-	{ {800, 300},{840, 260},{760, 260},
-	{780, 280},{810, 270},{770, 270},
-	{800, 260},{800, 280},{830, 270},
-	{790, 290},{780, 260},{790, 270},
-	{820, 260},{810, 290},{820, 280} };
+	{ one,{one.x - R, one.y - Sqr3 * R},{one.x + R, one.y - Sqr3 * R},
+	{one.x - 2*R,one.y - 2*Sqr3*R },{one.x + 2*R,one.y - 2 * Sqr3 * R},{one.x - 3*R, one.y - 3*Sqr3 * R},
+	{one.x-R,one.y - 3*Sqr3 * R},{one.x,one.y-2*Sqr3*R},{one.x+R,one.y-3*Sqr3 * R },
+	{one.x+3*R,one.y -3*Sqr3 * R},{one.x-4*R,one.y - 4 * Sqr3 * R},{one.x-2*R, one.y-4*Sqr3 * R},
+	{one.x, one.y - 4 * Sqr3 * R},{one.x+2*R, one.y - 4 * Sqr3 * R},{one.x+4*R, one.y - 4 * Sqr3 * R} };
+
+	//배치표
+	int table[15] = { SOLIDS,SOLIDS,STRIPES,
+		SOLIDS,STRIPES,SOLIDS,STRIPES,
+		UNKNOWN,SOLIDS,STRIPES,STRIPES,
+		SOLIDS,STRIPES,STRIPES,SOLIDS};
 
 	//배열 초기화
 	for (int i = 0; i < 15; ++i) {
-		ball[i] = new SampleBilliardBall(Cord[i], 10, color[i]);
-		ball[i]->setOwner(std::to_string(i+1)); 
+		int k = -1;
+		if (i == 0 || i == 7) //고정타입 센티널
+			k = i;
+		else {
+			if (table[i] == STRIPES) { //스트라이프
+				int val = rand() % str.size(); //난수 추출
+				k=str[val];
+				str.erase(remove(str.begin(), str.end(), str[val]), str.end()); //해당 요소 제거
+			}
+			else { //솔리드
+				int val = rand() % sol.size(); //난수 추출
+				k = sol[val];
+				sol.erase(remove(sol.begin(), sol.end(), sol[val]), sol.end()); //해당 요소 제거
+			}
+		}
+		ball[i] = new SampleBilliardBall(Cord[i], R, color[i]);
+		ball[i]->setOwner(std::to_string(k+1)); 
 		gameObjects.push_back(ball[i]);
 	}
-
 	//플레이어 정보
 	int PlayerCnt = 2; //플레이어 수
-	srand(time(NULL));
 	Player* p;
 	//첫번째 턴 난수
 	int FirstTurn = rand() % PlayerCnt; 
