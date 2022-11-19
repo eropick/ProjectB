@@ -8,6 +8,15 @@
 SampleGame::SampleGame(int width, int height, int fpsLimit)
 	:BaseGame(width, height, fpsLimit), isDraggingBall(false), draggedBall(nullptr)
 {
+	//게임 로그 남기도록
+	system("cls");
+	std::cout << "[Log]" << std::endl;
+	std::cout << "Start Game" << std::endl;
+	
+	// 테스트 코드 변수 초기화
+	isCatchingBall = false;
+	catchedBall = nullptr;
+
 	// SampleGame을 위한 인터페이스 생성 및 등록 
 
 	// SampleGame을 위한 당구대 생성 및 등록 
@@ -175,7 +184,6 @@ void SampleGame::handle(sf::Event& ev)
 		else if(ev.mouseButton.button == sf::Mouse::Right) {
 			for (SampleBilliardObject* obj : gameObjects)
 			{
-
 				// SampleBilliardBall의 인스턴스가 아닌 경우 pass
 				SampleBilliardBall* gameBall = dynamic_cast<SampleBilliardBall*>(obj);
 				if (gameBall == nullptr)
@@ -217,6 +225,29 @@ void SampleGame::update(void)
 	// 플레이어 서로의 주소 추가
 	if (&(Players[0]->getNextP()) == nullptr) Players[0]->setNextP(*Players[1]);
 	if (&(Players[1]->getNextP()) == nullptr) Players[1]->setNextP(*Players[0]);
+
+	//타이머
+	sf::Time timeout = sf::seconds(5); //n초 설정
+	sf::Time sec = playerClock.getElapsedTime(); //플레이어의 시간을 불러와서
+
+	//공이 움직이고 있을 때는 계속 게임 시간 restart
+	if (Players[0]->isPhase() == MOVE || Players[1]->isPhase() == MOVE) { 
+		if(StopTimer==0)
+			StopTimer = sec.asSeconds();
+		playerClock.restart();
+	}
+	else if (Player::WhoisTurn().isWin() == WIN) { //이겼을 때 적용x
+		if (StopTimer == 0)
+			StopTimer = sec.asSeconds();
+	}
+	else if (timeout < sec) { //플레이어 시간이 n초를 넘기면
+		Player::WhoisTurn().getNextP().setTurn(true); //다음 사람의 턴 true로
+		Player::WhoisTurn().getNextP().setTurn(false); //현재 턴 아닌사람 false로
+		StopTimer= 0;
+		playerClock.restart();
+	}
+	else //움직이지 않을 때
+		StopTimer = 0;
 	
 	//필요한 공
 	SampleBilliardGameBall* playerBall = nullptr;
@@ -248,14 +279,10 @@ void SampleGame::update(void)
 		}
 	}
 	//오브젝트 업데이트 후에 값이 없으면 종료
-	if (playerBall == nullptr|| eightBall == nullptr) exit(-1);  
-
-	//플레이어 업데이트, 점수판 업데이트
-	for (Player* p : Players)
-	{
-		p->update(*playerBall, *eightBall, Velocity);
+	if (playerBall == nullptr || eightBall == nullptr) {
+		std::cout << "Exit[-1]: Error" << std::endl;
+		exit(-1);
 	}
-	
 	// 게임 오브젝트 충돌 검사
 	for (SampleBilliardObject* obj1 : gameObjects)
 	{
@@ -264,6 +291,9 @@ void SampleGame::update(void)
 			obj1->collide(*obj2);
 		}
 	}
+
+	//플레이어 업데이트, 점수판 업데이트
+	Player::WhoisTurn().EightBallupdate(*playerBall, *eightBall, Velocity);
 
 	// 끌었다가 놓은 공에 속도를 지정하고 표시 해제
 	if (!isDraggingBall && draggedBall != nullptr)
@@ -274,7 +304,7 @@ void SampleGame::update(void)
 
 	//플레이어 볼의 속도와 잡힌 공을 포켓위치로 넣어버림.
 	if (!isCatchingBall && catchedBall != nullptr) {
-		playerBall->setVelocity(playerBall->getVelocity().x+5, playerBall->getVelocity().y+5);
+		playerBall->setVelocity(2, 2);
 		catchedBall->setPosition(595, 447);
 		catchedBall = nullptr;
 	}
@@ -305,6 +335,9 @@ void SampleGame::render(sf::RenderTarget& target)
 	renderDragpower(target);
 
 	// 게임 UI 렌더링
+
+	//플레이어 시간
+	PlayerTimerRender(target);
 }
 
 void SampleGame::renderDragpower(sf::RenderTarget& target)
@@ -332,3 +365,17 @@ void SampleGame::renderDragpower(sf::RenderTarget& target)
 	}
 }
 
+void SampleGame::PlayerTimerRender(sf::RenderTarget& target) {
+
+	sf::RectangleShape TimerBar;
+	TimerBar.setFillColor(sf::Color::Green);
+	TimerBar.setOutlineColor(sf::Color::Black);
+	TimerBar.setOutlineThickness(1);
+	TimerBar.setPosition(30.f, 50.f);
+
+	if(StopTimer!=0) //턴 넘겨질 때 정지된 시간
+		TimerBar.setSize(sf::Vector2f(300- StopTimer*60, 20));
+	else
+		TimerBar.setSize(sf::Vector2f(300 - playerClock.getElapsedTime().asSeconds()* 60, 20));
+	target.draw(TimerBar);
+}

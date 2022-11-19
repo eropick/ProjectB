@@ -45,12 +45,15 @@ private:
 	// Sample Game 에서 공을 쏘는 강도 표시
 	void renderDragpower(sf::RenderTarget& target);
 
+	//타이머 랜더링
+	void PlayerTimerRender(sf::RenderTarget& target);
+
 private:
 	// Sample Game에서 관리하는 게임 오브젝트들 (공, 당구대 등) 
 	std::vector<SampleBilliardObject*> gameObjects;
 	std::vector<Player*> Players;
 
-	// 게임 UI 
+	// 게임 UI
 
 	// 게임 시간 
 	sf::Clock clock;
@@ -68,4 +71,9 @@ private:
 
 	// 게임 전역 폰트 
 	static sf::Font* font;
+
+	//player 게임 시간
+	sf::Clock playerClock;
+	float StopTimer;
+
 };

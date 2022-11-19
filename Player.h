@@ -23,13 +23,17 @@ enum {
 	STOP=-1,BASIC,MOVE
 };
 
+enum {
+	DEFAULT=-1,LAST,WIN
+};
+
 class Player : public SampleBilliardObject{
 public:
 	Player();
 	Player(int num,bool turn);
 	virtual ~Player(void);
 
-	void update(SampleBilliardGameBall& Ball, SampleBilliardObject& eightBall, int V);
+	void EightBallupdate(SampleBilliardGameBall& Ball, SampleBilliardObject& eightBall, int V);
 
 	// Sample Game의 객체들은 반드시 상태 갱신 함수 구현해야 함 
 	virtual void update(float timeElapsed);
@@ -57,9 +61,14 @@ public:
 	void setScore(std::string param);
 	std::string getScore() const;
 	
-	void yourWin(bool win); //승리
-	void yourLose(bool lose); //패배
-	bool isWin() const; //승패가 결정되었는지
+	
+	void yourLose(); //패배
+	void yourWin(); //승리
+	
+	void setWin(int n); //승리 단계 설정
+	int isWin() const; //승리 단계
+
+	bool isLast(); //플레이어가 마지막 단계인지 확인 
 
 	void setBallType(int type); //공 타입
 	int getBallType() const;
@@ -75,7 +84,7 @@ private:
 	static int PocketSize; //포켓의 요소 수를 저장함(포켓 크기의 변화를 판단할 때 사용할 것.
 	bool turn;
 	int Phase; // 공 치기 전 : 0 || 공을 친 상태 : 1 || 공을 치고 정지 : -1 
-	bool win; //기본 false
+	int win; // 승리 : 1 || 승리전 : 0 || 기본: -1
 	int score;
 	int ballType; //-1: 브레이크 샷(초구) || 0: 미정  | 1: Solids  | 9:  Stripes 
 	int PlayerNum; //플레이어 넘버
