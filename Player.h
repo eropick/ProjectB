@@ -61,7 +61,6 @@ public:
 	void setScore(std::string param);
 	std::string getScore() const;
 	
-	
 	void yourLose(); //패배
 	void yourWin(); //승리
 	
@@ -73,11 +72,17 @@ public:
 	void setBallType(int type); //공 타입
 	int getBallType() const;
 
+	//공 타입에 따른 설정
+	void IfTypeSet(int DiffSize); 
+
 	void setPutBallCnt(int num); //플레이어가 넣은 공의 수
 	int getPutBallCnt() const; 
 
 	void setNextP(Player& p);
 	Player& getNextP() const;
+
+	//플레이어 정보 초기화
+	void Init();
 
 private:
 	static Player* TurnPlayer; //정적멤버로 턴을 가지고 있는 플레이어를 넣는다.	

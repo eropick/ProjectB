@@ -4,15 +4,20 @@
 #include "BilliardPocket.h"
 #include "SampleBilliardObject.h"
 #include "ScoreBoard.h"
+#include "StartGame.h"
 
-SampleGame::SampleGame(int width, int height, int fpsLimit)
-	:BaseGame(width, height, fpsLimit), isDraggingBall(false), draggedBall(nullptr)
+SampleGame::SampleGame(int width, int height, int fpsLimit,int option)
+	: BaseGame(width, height, fpsLimit,option), isDraggingBall(false), draggedBall(nullptr)
 {
 	//게임 로그 남기도록
 	system("cls");
 	std::cout << "[Log]" << std::endl;
 	std::cout << "Start Game" << std::endl;
-	srand(time(NULL)); 
+	srand(time(NULL));
+
+	//배경로드
+	tBackGround.loadFromFile("배경.png");
+	sBackGround.setTexture(tBackGround);
 
 	// 테스트 코드 변수 초기화
 	isCatchingBall = false;
@@ -29,7 +34,7 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 	//포켓 1~6번
 	BilliardPocket* Pocket[6];
 	//포켓 x,y 좌표 한 번에 변경 가능하도록 해놨습니다.
-	float x[2] = { 595,1002 }; 
+	float x[2] = { 595,1002 };
 	float y[3] = { 48,447,850 };
 
 	sf::Vector2f PocketCord[6] = {
@@ -53,7 +58,7 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 
 	//플레이어볼
 	SampleBilliardGameBall* PlayerBall =
-		new SampleBilliardGameBall(sf::Vector2f(one.x, one.y+300), R, sf::Color::White);
+		new SampleBilliardGameBall(sf::Vector2f(one.x, one.y + 300), R, sf::Color::White);
 	PlayerBall->setOwner("P");
 	PlayerBall->setPlayable(true);
 	gameObjects.push_back(PlayerBall);
@@ -64,37 +69,35 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 
 	//색 매핑
 	//1~7번 공은 단색공 = 총 7개
-    //9번~15번 공은 줄무늬 공 = 총 7개
-    //노랑, 남색, 빨강, 보라(핑크), 주황, 초록, 갈색  = 총 7개
+	//9번~15번 공은 줄무늬 공 = 총 7개
+	//노랑, 남색, 빨강, 보라(핑크), 주황, 초록, 갈색  = 총 7개
 	C color[15] = {
-    C::Yellow, C::Color(0,0,128), C::Red,
-    C::Color(77,55,123), C::Color(255,165,0), C::Green,
-    C::Color(111, 79, 48),C::Black,C::Yellow,
-    C::Color(0,0,128), C::Red,C::Color(77,55,123),
-    C::Color(255,165,0), C::Green,  C::Color(111, 79, 48),
+	C::Yellow, C::Color(0,0,128), C::Red,
+	C::Color(77,55,123), C::Color(255,165,0), C::Green,
+	C::Color(111, 79, 48),C::Black,C::Yellow,
+	C::Color(0,0,128), C::Red,C::Color(77,55,123),
+	C::Color(255,165,0), C::Green,  C::Color(111, 79, 48),
 	};
 
 	//공 좌표 매핑
 	//1번은 맨 앞에, 8번은 가운데
-    //2번과 3번은 양쪽 끝에
-    //1번 다음 배열은 띠공-띠공
-    //중간배열은 색꽁-띠공 번갈아가면서
+	//나머지는 배치표에 맞게 난수로 생성 
 
-	std::vector<int> sol = { 1,2,3,4,5,6 }; 
+	std::vector<int> sol = { 1,2,3,4,5,6 };
 	std::vector<int> str = { 8,9,10,11,12,13,14 };
 
 	sf::Vector2f Cord[15] =
 	{ one,{one.x - R, one.y - Sqr3 * R},{one.x + R, one.y - Sqr3 * R},
-	{one.x - 2*R,one.y - 2*Sqr3*R },{one.x + 2*R,one.y - 2 * Sqr3 * R},{one.x - 3*R, one.y - 3*Sqr3 * R},
-	{one.x-R,one.y - 3*Sqr3 * R},{one.x,one.y-2*Sqr3*R},{one.x+R,one.y-3*Sqr3 * R },
-	{one.x+3*R,one.y -3*Sqr3 * R},{one.x-4*R,one.y - 4 * Sqr3 * R},{one.x-2*R, one.y-4*Sqr3 * R},
-	{one.x, one.y - 4 * Sqr3 * R},{one.x+2*R, one.y - 4 * Sqr3 * R},{one.x+4*R, one.y - 4 * Sqr3 * R} };
+	{one.x - 2 * R,one.y - 2 * Sqr3 * R },{one.x + 2 * R,one.y - 2 * Sqr3 * R},{one.x - 3 * R, one.y - 3 * Sqr3 * R},
+	{one.x - R,one.y - 3 * Sqr3 * R},{one.x,one.y - 2 * Sqr3 * R},{one.x + R,one.y - 3 * Sqr3 * R },
+	{one.x + 3 * R,one.y - 3 * Sqr3 * R},{one.x - 4 * R,one.y - 4 * Sqr3 * R},{one.x - 2 * R, one.y - 4 * Sqr3 * R},
+	{one.x, one.y - 4 * Sqr3 * R},{one.x + 2 * R, one.y - 4 * Sqr3 * R},{one.x + 4 * R, one.y - 4 * Sqr3 * R} };
 
 	//배치표
 	int table[15] = { SOLIDS,SOLIDS,STRIPES,
 		SOLIDS,STRIPES,SOLIDS,STRIPES,
 		UNKNOWN,SOLIDS,STRIPES,STRIPES,
-		SOLIDS,STRIPES,STRIPES,SOLIDS};
+		SOLIDS,STRIPES,STRIPES,SOLIDS };
 
 	//배열 초기화
 	for (int i = 0; i < 15; ++i) {
@@ -104,37 +107,37 @@ SampleGame::SampleGame(int width, int height, int fpsLimit)
 		else {
 			if (table[i] == STRIPES) { //스트라이프
 				int val = rand() % str.size(); //난수 추출
-				k=str[val];
+				k = str[val];
 				str.erase(remove(str.begin(), str.end(), str[val]), str.end()); //해당 요소 제거
 			}
 			else { //솔리드
-				int val = rand() % sol.size(); //난수 추출
+				int val = rand() % sol.size();
 				k = sol[val];
 				sol.erase(remove(sol.begin(), sol.end(), sol[val]), sol.end()); //해당 요소 제거
 			}
 		}
 		ball[i] = new SampleBilliardBall(Cord[i], R, color[i]);
-		ball[i]->setOwner(std::to_string(k+1)); 
+		ball[i]->setOwner(std::to_string(k + 1));
 		gameObjects.push_back(ball[i]);
 	}
 	//플레이어 정보
 	int PlayerCnt = 2; //플레이어 수
 	Player* p;
 	//첫번째 턴 난수
-	int FirstTurn = rand() % PlayerCnt; 
+	int FirstTurn = rand() % PlayerCnt;
 	for (int i = 0; i < 2; ++i) {
-		if(FirstTurn==i){
-			p = new Player(i+1, true);
+		if (FirstTurn == i) {
+			p = new Player(i + 1, true);
 		}
-		else{
-			p = new Player(i+1, false);
+		else {
+			p = new Player(i + 1, false);
 		}
 		Players.push_back(p);
 	}
 }
 
 SampleGame::~SampleGame(void)
-{
+{	
 	// UI 인스턴스 해제  
 	// 게임 오브젝트들 해제 
 	for (SampleBilliardObject* obj : gameObjects)
@@ -151,7 +154,7 @@ const sf::Font& SampleGame::getFont(void)
 {
 	if (font == nullptr) {
 		font = new sf::Font;
-		font->loadFromFile("Arial.ttf");
+		font->loadFromFile("THE_Oegyeinseolmyeongseo.ttf");
 	}
 	return *font;
 }
@@ -350,6 +353,9 @@ void SampleGame::render(sf::RenderTarget& target)
 {
 	// 화면 클리어 
 	window->clear(sf::Color(75, 103, 163));
+
+	// 배경 추가
+	target.draw(sBackGround);
 
 	// 플레이어 정보 렌더링
 	for (Player* p : Players)

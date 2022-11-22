@@ -23,7 +23,7 @@ class SampleGame : public BaseGame
 {
 public:
 	// Sample Game 초기화 
-	SampleGame(int width, int height, int fpsLimit);
+	SampleGame(int width, int height, int fpsLimit, int option);
 
 	// Sample Game 해제 
 	virtual ~SampleGame(void);
@@ -54,6 +54,8 @@ private:
 	std::vector<Player*> Players;
 
 	// 게임 UI
+	sf::Texture tBackGround;
+	sf::Sprite sBackGround;
 
 	// 게임 시간 
 	sf::Clock clock;
@@ -75,5 +77,4 @@ private:
 	//player 게임 시간
 	sf::Clock playerClock;
 	float StopTimer;
-
 };

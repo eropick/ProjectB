@@ -1,14 +1,30 @@
+#include "StartGame.h"
 #include "BaseGame.h"
 
-BaseGame::BaseGame(int width, int height, int fpsLimit) : window(nullptr)
+BaseGame::BaseGame(int width, int height, int fpsLimit, int option) : window(nullptr)
 {
-	// 게임 윈도우 초기화 
-	window = new sf::RenderWindow(sf::VideoMode(width, height), "EightBall", sf::Style::Default);
-	window->setFramerateLimit(fpsLimit);
+	switch (option) {
+	case EIGHTBALL: //8Ball 
+	{
+		PlayBGM("게임음악.wav");
+		window = new sf::RenderWindow(sf::VideoMode(width, height), "EightBall", sf::Style::Default);
+		window->setFramerateLimit(fpsLimit);
+	}
+	break;
+	default:
+	{
+		//PlayBGM("????");
+		window = new sf::RenderWindow(sf::VideoMode(width, height), "???????", sf::Style::Default);
+		window->setFramerateLimit(fpsLimit);
+	}
+	break;
+	}
 }
 
 BaseGame::~BaseGame(void)
 {
+	//음악중지
+	Gamesound.stop(); 
 	// 게임 윈도우 해제 
 	delete window;
 }
@@ -40,4 +56,13 @@ void BaseGame::run(void)
 		// 렌더링 결과 표시
 		window->display();
 	}
+}
+
+void BaseGame::PlayBGM(const char* BGM) {
+	//배경음악 로드
+	if (!Gamebuffer.loadFromFile(BGM))
+		std::cout << "음악을 재생할 수 없습니다." << std::endl;
+	Gamesound.setBuffer(Gamebuffer);
+	Gamesound.play();
+	Gamesound.setLoop(true);
 }
