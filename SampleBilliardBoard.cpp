@@ -21,8 +21,8 @@ SampleBilliardBoard::SampleBilliardBoard(void)
 	Radius = Radius + 5.f; //공의 반경 + 여분
 	
 	//내부 경계
-	float inX[2] = { 602.5f,992.f };
-	float inY[2] = { 55.f,840.f };
+	float inX[2] = { INLEFT,INRIGHT };
+	float inY[2] = { INTOP,INBOTTOM };
 	typedef SampleBilliardBoard::Border B;
 	B inLineTop(inX[0]+Radius, inY[0], inX[1]- Radius, inY[0]);
 	B inLineBottom(inX[0]+ Radius, inY[1], inX[1]- Radius, inY[1]);
@@ -121,4 +121,13 @@ void SampleBilliardBoard::render(sf::RenderTarget& target)
 const std::vector<SampleBilliardBoard::Border>& SampleBilliardBoard::getBorders(void) const
 {
 	return borderLines;
+}
+
+
+//보드내부에 있는지 검사
+bool SampleBilliardBoard::inBoard(sf::Vector2f vec) {
+	if (vec.x >= INLEFT && vec.x <= INRIGHT && vec.y >= INTOP && vec.y <= INBOTTOM)
+		return true;
+	else
+		return false;
 }

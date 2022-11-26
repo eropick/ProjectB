@@ -33,13 +33,16 @@ int Player::getSizePocket() {
 }
 
 //가상함수
-void Player::update(float timeElapsed) {} //일정 시간지나면 자동으로 턴넘기기 할 때 쓰면?
+void Player::update(float timeElapsed) {}
 void Player::collide(SampleBilliardObject& other) {} //충돌 이벤트 x
 
 
 //플레이어 볼과 8번공,속도를 받음
 void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardObject& eightBall, int V) {
-	if (win == WIN) return; //이겼다면 실행x
+	if (win == WIN) {
+		PocketSize = 0;
+		return; //이겼다면 실행x
+	}
 	//플레이어 턴일 때
 	if (turn) {
 		switch (Phase) {  //Phase : 공의 상태
@@ -330,14 +333,3 @@ void Player::Init() {
 	PutBallCnt = 0;
 	NextP = nullptr;
 }
-
-static Player* TurnPlayer; //정적멤버로 턴을 가지고 있는 플레이어를 넣는다.	
-static int PocketSize; //포켓의 요소 수를 저장함(포켓 크기의 변화를 판단할 때 사용할 것.
-bool turn;
-int Phase; // 공 치기 전 : 0 || 공을 친 상태 : 1 || 공을 치고 정지 : -1 
-int win; // 승리 : 1 || 승리전 : 0 || 기본: -1
-int score;
-int ballType; //-1: 브레이크 샷(초구) || 0: 미정  | 1: Solids  | 9:  Stripes 
-int PlayerNum; //플레이어 넘버
-int PutBallCnt; //넣은 공의 수 : 흰 공 제외
-Player* NextP; //다음 플레이어의 주소

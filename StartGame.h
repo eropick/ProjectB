@@ -3,7 +3,6 @@
 #include <vector> 
 #include <string>
 #include <cstdlib>
-#include <thread>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>
@@ -69,8 +68,8 @@ private:
 	sf::Texture	ButtonT4;
 
 	//게임버튼
-	std::vector<GameButton*> GBBW; //흑백
-	std::vector<GameButton*> GB; //색
+	std::vector<GameButton*> GBBW; //흑백 버튼
+	std::vector<GameButton*> GB; //색 버튼
 
 	//백그라운드 텍스쳐
 	sf::Texture			BackGround;

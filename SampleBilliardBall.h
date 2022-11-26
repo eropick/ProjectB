@@ -8,6 +8,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
+#include <SFML/Audio.hpp>
 
 #include "SampleBilliardObject.h"
 #include "SampleBilliardBoard.h"
@@ -64,13 +65,17 @@ public:
 	const sf::VertexArray& getVertices(void) const;
 	void setOwner(std::string owner);
 	bool isOwner(std::string owner);
-	std::string getOwner(void);
+	std::string getOwner(void); 
+
 private:
 	// 공과 충돌한 경우 
 	void collideWithBall(SampleBilliardBall& other);
 
 	// 당구대와 충돌한 경우 
 	void collideWithBoard(SampleBilliardBoard& other);
+
+	void effectBallSound(void); //공 충돌 소리
+	void effectPocketSound(void);
 
 private:
 	sf::Vector2f position;
@@ -85,5 +90,10 @@ private:
 	sf::Color color;
 
 	std::string owner;
+
+
+	//effectSound
+	sf::SoundBuffer effectBuffer[2];
+	sf::Sound effectSound[2];
 
 };

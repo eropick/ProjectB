@@ -6,10 +6,12 @@ vector<SampleBilliardObject*> BilliardPocket::Pocket;
 
 //소멸자.
 BilliardPocket::~BilliardPocket() {
-	for (SampleBilliardObject* obj : Pocket)
-	{
-		delete obj;
-	}
+	//포켓 클리어
+	initPocket();
+}
+
+void BilliardPocket::initPocket() {
+	Pocket.clear();
 }
 
 //오브젝트 충돌 재정의

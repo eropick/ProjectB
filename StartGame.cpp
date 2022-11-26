@@ -2,9 +2,10 @@
 
 
 StartGame::StartGame(int width, int height, int fpsLimit) 
-	: Width(width), Height(height), FpsLimit(fpsLimit), option(0), isChangeBK(false)
+	: Width(width), Height(height), FpsLimit(fpsLimit), option(0), isChangeBK(false), interval(0), time(0)
 {	
-	std::cout << "GameWindowLoading..." << std::endl;
+	std::cout << "GameWindow Loading..." << std::endl;
+
 	//음악설정
 	if (!Startbuffer.loadFromFile("로비음악.wav"))
 		std::cout << "음악을 재생할 수 없습니다." << std::endl;
@@ -27,12 +28,19 @@ StartGame::StartGame(int width, int height, int fpsLimit)
 	BackGround.loadFromFile("empty.png", sf::IntRect(0, 0, 500, 500));
 	sprite.setTexture(texture);
 	sprite.setPosition(0, 0);
-
-	//버튼 추가 >> 인자로 이미지이름,x좌표,y좌표,너비,높이를 받음
-	GBBW.push_back(new GameButton("eightball_bw.png", 0, 40, 164, 149));
-	GB.push_back(new GameButton("eightball.png",0,40,164,149));
-
 	Tnum = T1;
+
+	//버튼 추가 
+	int Bw = 149;
+	int Bh = 126;
+	GBBW.push_back(new GameButton("eightball_bw.png", 170, 40, Bw, Bh));
+	GB.push_back(new GameButton("eightball.png",170,40, Bw, Bh));
+	GBBW.push_back(new GameButton("threeball_bw.png", 75, 200, Bw, Bh));
+	//GB.push_back(new GameButton("threeball.png", 75, 200, Bw, Bh));  
+	GBBW.push_back(new GameButton("fourball_bw.png", 280, 200, Bw, Bh));
+	//GB.push_back(new GameButton("fourball.png", 280, 200, Bw, Bh));
+	for (GameButton* g : GBBW)
+		g->setVisible(true);
 }
 
 bool StartGame::Close = false;
@@ -71,20 +79,14 @@ void StartGame::handle(sf::Event& ev)
 		// 마우스 움직임 이벤트 
 		mouseXY.x = (float)ev.mouseMove.x;
 		mouseXY.y = (float)ev.mouseMove.y;
-		
-		for (GameButton* g : GB) {
-			if (g->isIntersecting(mouseXY))
-				g->setVisible(true);
-			else
-				g->setVisible(false);
-		}
-		for (GameButton* g : GBBW) {
-			if (g->isIntersecting(mouseXY))
-				g->setVisible(false);
-			else
-				g->setVisible(true);
-		}
 
+		//버튼내 마우스 들어오면 보이도록
+		for (GameButton* g : GB) {
+			if (g->inButton(mouseXY))
+				g->setVisible(true);
+			else
+				g->setVisible(false);
+		}
 		break;
 	case sf::Event::MouseButtonPressed:
 		if (ev.mouseButton.button == sf::Mouse::Left) {
@@ -95,18 +97,19 @@ void StartGame::handle(sf::Event& ev)
 				isChangeBK=true; //화면 변경
 			}
 			else { //변경되었을 때
-				if (GB[0]->isIntersecting(mouseXY)){
-					option = EIGHTBALL;
+				//버튼1 안에서 좌클릭 발생 시
+				if (GB[0]->inButton(mouseXY)){
+					option = EIGHTBALL; //EIGHTBALL게임 실행
 					window->close();
 				}
 				else {
-					//그 외 처리
+					//버튼 2, 3 에 대한 옵션	
 				}
 			}
 		}
 		if (ev.mouseButton.button == sf::Mouse::Right) {
 			if (!isChangeBK) { 
-				//nothing..
+				//nothing...
 			}
 			else { 
 				sprite.setTexture(texture);
@@ -150,7 +153,6 @@ void StartGame::render(sf::RenderTarget& target)
 	//배경 변경 전
 	if (!isChangeBK)
 	{
-		//버튼 변경
 		time = clock.getElapsedTime().asSeconds();
 		interval += time;
 		if (interval > 0.1)
@@ -191,11 +193,18 @@ void StartGame::render(sf::RenderTarget& target)
 		target.draw(Bsprite);
 		clock.restart(); //재시작
 	}
-	else {
+	else { //게임 선택 화면
+		sf::Text SelectGame;
+		SelectGame.setFont(SampleGame::getFont());
+		SelectGame.setFillColor(sf::Color::Yellow);
+		SelectGame.setCharacterSize(35);
+		SelectGame.setString("Select   Game");
+		SelectGame.setPosition(150,400);
 		target.draw(sprite);
-		for (GameButton* g : GB)
-			g->render(target);
+		target.draw(SelectGame);
 		for (GameButton* g : GBBW)
+			g->render(target);
+		for (GameButton* g : GB)
 			g->render(target);
 	}
 }

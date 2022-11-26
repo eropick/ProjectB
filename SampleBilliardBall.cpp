@@ -34,6 +34,17 @@ SampleBilliardBall::SampleBilliardBall(sf::Vector2f position, float radius, sf::
 		y = position.y + radius * sinf(((360.f) / (static_cast<float>(NUMVERTICES - 2)) * i + angle) * float(M_PI) / 180.f);
 		vertices[i] = sf::Vertex(sf::Vector2f(x, y), color);
 	}
+
+	//공들 부딪히는 소리
+	if (!effectBuffer[0].loadFromFile("billiard_ball.wav"))
+		std::cout << "이펙트 사운드를 로딩할 수 없습니다." << std::endl;
+	effectSound[0].setBuffer(effectBuffer[0]);
+
+	//포켓 들어가는 소리
+	if (!effectBuffer[1].loadFromFile("billiard_goal.wav"))
+		std::cout << "이펙트 사운드를 로딩할 수 없습니다." << std::endl;
+	effectSound[1].setBuffer(effectBuffer[1]);
+
 }
 
 SampleBilliardBall::SampleBilliardBall(const SampleBilliardBall& rhs) : SampleBilliardBall(rhs.position, rhs.radius, rhs.color)
@@ -249,10 +260,17 @@ void SampleBilliardBall::collideWithBall(SampleBilliardBall& other)
 		//포켓하고 충돌할 경우
 		if (dynamic_cast<BilliardPocket*>(&other) != nullptr)
 		{
+			effectPocketSound();
 			//포켓 오브젝트에서 처리함.
 			//gameObjects에서 삭제해주고 pocket오브젝트에 넣을 것(미구현)
 			return;
 		}
+		
+		//두 공의 속도가 0이 아닐 때만 발생하도록
+		if(other.getVelocity().x!=0&& other.getVelocity().y!= 0&&
+			getVelocity().x!=0&& getVelocity().y != 0)
+			effectBallSound();
+
 		// 겹치는 정도 계산 
 		float overlap = (distanceBetween - getRadius() - other.getRadius()) / 2.f;
 		float moveX = (overlap * (getPosition().x - other.getPosition().x) / distanceBetween);
@@ -308,6 +326,7 @@ void SampleBilliardBall::collideWithBoard(SampleBilliardBoard& other)
 		{
 			if (t > -0.f && t < 1.f)
 			{
+				effectBallSound(); //board에 공이 부딪힐 때
 				setPosition(p.x - distance.x * overlap / distanceBetween, p.y - distance.y * overlap / distanceBetween);
 				setVelocity(-normal.x * dotProductNormal + tangential.x * dotProductTangential,
 					-normal.y * dotProductNormal + tangential.y * dotProductTangential);
@@ -329,4 +348,14 @@ bool SampleBilliardBall::isOwner(std::string owner)
 std::string SampleBilliardBall::getOwner(void)
 {
 	return owner;
+}
+
+void SampleBilliardBall::effectBallSound(void)
+{
+	effectSound[0].play();
+}
+
+void SampleBilliardBall::effectPocketSound(void)
+{
+	effectSound[1].play();
 }

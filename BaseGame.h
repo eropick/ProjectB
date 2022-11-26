@@ -44,5 +44,4 @@ private:
 	//BGM
 	sf::SoundBuffer Gamebuffer;
 	sf::Sound Gamesound;
-
 };
