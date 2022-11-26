@@ -191,7 +191,7 @@ void SampleGame::handle(sf::Event& ev)
 			// TODO: game paused 
 			// TODO: call sample GUI 
 		}
-		if (Player::WhoisTurn().isWin() != WIN) {
+		if (Player::WhoisTurn().isPhase()!=MOVE&& Player::WhoisTurn().isWin() != WIN) {
 			if (ev.key.code == sf::Keyboard::Space) {
 				power->setPressedSpace(true);
 			}
