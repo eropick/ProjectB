@@ -74,9 +74,6 @@ private:
 	// 寸备措客 面倒茄 版快 
 	void collideWithBoard(SampleBilliardBoard& other);
 
-	void effectBallSound(void); //傍 面倒 家府
-	void effectPocketSound(void);
-
 private:
 	sf::Vector2f position;
 	sf::Vector2f acceleration;
@@ -90,10 +87,4 @@ private:
 	sf::Color color;
 
 	std::string owner;
-
-
-	//effectSound
-	sf::SoundBuffer effectBuffer[2];
-	sf::Sound effectSound[2];
-
 };

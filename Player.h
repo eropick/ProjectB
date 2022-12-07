@@ -27,6 +27,11 @@ enum {
 	DEFAULT=-1,LAST,WIN
 };
 
+//3구의 성공여부
+enum {
+	FAILURE=0,SUCCESS
+};
+
 class Player : public SampleBilliardObject{
 public:
 	Player();
@@ -34,6 +39,7 @@ public:
 	virtual ~Player(void);
 
 	void EightBallupdate(SampleBilliardGameBall& Ball, SampleBilliardObject& eightBall, int V);
+	void ThreeBallupdate(SampleBilliardGameBall& playerBall, int V);
 
 	// Sample Game의 객체들은 반드시 상태 갱신 함수 구현해야 함 
 	virtual void update(float timeElapsed);
@@ -43,6 +49,9 @@ public:
 
 	// Sample Game의 객체들은 반드시 렌더링 함수 구현해야 함  
 	virtual void render(sf::RenderTarget& target);
+
+	//3구 점수판 렌더링
+	void ThreeBallrender(sf::RenderTarget& target);
 
 	int getPlayerNum() const; //플레이어 넘버
 
@@ -92,6 +101,7 @@ private:
 	int win; // 승리 : 1 || 승리전 : 0 || 기본: -1
 	int score;
 	int ballType; //-1: 브레이크 샷(초구) || 0: 미정  | 1: Solids  | 9:  Stripes 
+	int whether; //성공,실패 여부
 	int PlayerNum; //플레이어 넘버
 	int PutBallCnt; //넣은 공의 수 : 흰 공 제외
 	Player* NextP; //다음 플레이어의 주소

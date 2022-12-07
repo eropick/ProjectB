@@ -36,7 +36,7 @@ StartGame::StartGame(int width, int height, int fpsLimit)
 	GBBW.push_back(new GameButton("eightball_bw.png", 170, 40, Bw, Bh));
 	GB.push_back(new GameButton("eightball.png",170,40, Bw, Bh));
 	GBBW.push_back(new GameButton("threeball_bw.png", 75, 200, Bw, Bh));
-	//GB.push_back(new GameButton("threeball.png", 75, 200, Bw, Bh));  
+	GB.push_back(new GameButton("threeball.png", 75, 200, Bw, Bh));  
 	GBBW.push_back(new GameButton("fourball_bw.png", 280, 200, Bw, Bh));
 	//GB.push_back(new GameButton("fourball.png", 280, 200, Bw, Bh));
 	for (GameButton* g : GBBW)
@@ -60,10 +60,23 @@ StartGame::~StartGame(void)
 	}
 	delete window;
 	//창 닫고 게임 불러옴
-	if(option>0){
+	switch(option){
+	case EIGHTBALL:
+	{
 		BaseGame&& game = SampleGame(Width, Height, FpsLimit,option);
 		game.run();
 		option = 0; //기본
+		break;
+	}
+	case THREEBALL:
+	{
+		BaseGame&& game = ThreeBallGame(Width, Height, FpsLimit, option);
+		game.run();
+		option = 0;
+		break;
+	}
+	default:
+		break;
 	}
 	std::cout << "Exit" << std::endl;
 }
@@ -79,7 +92,6 @@ void StartGame::handle(sf::Event& ev)
 		// 마우스 움직임 이벤트 
 		mouseXY.x = (float)ev.mouseMove.x;
 		mouseXY.y = (float)ev.mouseMove.y;
-
 		//버튼내 마우스 들어오면 보이도록
 		for (GameButton* g : GB) {
 			if (g->inButton(mouseXY))
@@ -102,8 +114,12 @@ void StartGame::handle(sf::Event& ev)
 					option = EIGHTBALL; //EIGHTBALL게임 실행
 					window->close();
 				}
+				else if(GB[1]->inButton(mouseXY)) {
+					option = THREEBALL; //THREEBALL게임 실행
+					window->close();
+				}
 				else {
-					//버튼 2, 3 에 대한 옵션	
+					//4구..
 				}
 			}
 		}

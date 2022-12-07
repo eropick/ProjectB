@@ -22,18 +22,19 @@
 #include "Power.h"
 #include "GameExit.h"
 
-class SampleGame : public BaseGame
+class ThreeBallGame : public BaseGame
 {
 public:
-	// Sample Game 초기화 
-	SampleGame(int width, int height, int fpsLimit, int option);
+	//3구 초기화 
+	ThreeBallGame(int width, int height, int fpsLimit, int option);
 
-	// Sample Game 해제 
-	virtual ~SampleGame(void);
+	//해제 
+	virtual ~ThreeBallGame(void);
 
 	// Sample Game 전역 폰트 
 	static const sf::Font& getFont(void);
 
+	
 protected:
 	// 상속 클래스는 반드시 이벤트 핸들링 함수 구현해야 함 
 	virtual void handle(sf::Event& ev);
@@ -45,7 +46,6 @@ protected:
 	virtual void render(sf::RenderTarget& target);
 
 private:
-
 	//공의 방향 랜더링
 	void renderDirection(sf::RenderTarget& target);
 
@@ -62,7 +62,7 @@ private:
 	// Sample Game에서 관리하는 게임 오브젝트들 (공, 당구대 등) 
 	std::vector<SampleBilliardObject*> gameObjects;
 	std::vector<Player*> Players;
-	
+
 	//게임 종료창
 	GameExit* ExitWindow;
 
@@ -77,6 +77,9 @@ private:
 	sf::Vector2f mouseXY;
 	//마우스로 끌었는지 여부
 	bool isDraggedMouse;
+
+	//PlayerBall과 당구대 충돌횟수	
+	int CollideBoardCnt; 
 
 	//파워
 	Power* power;

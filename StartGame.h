@@ -16,6 +16,7 @@
 
 #include "GameButton.h"
 #include "SampleGame.h"
+#include "ThreeBallGame.h"
 #include "BaseGame.h"
 #include "SampleBilliardGameBall.h"
 
@@ -25,7 +26,7 @@ enum {
 
 //게임 추가 될 때 여기에 옵션 추가
 enum {
-	DEF=0,EIGHTBALL
+	DEF=0,EIGHTBALL,THREEBALL
 };
 
 class StartGame{

@@ -15,6 +15,7 @@ Player::Player(int num,bool turn) : Phase(BASIC)
 	setTurn(turn);
 	setPutBallCnt(0);
 	NextP = nullptr;
+	whether = DEFAULT;
 }
 
 Player::~Player(void) {
@@ -37,6 +38,7 @@ void Player::update(float timeElapsed) {}
 void Player::collide(SampleBilliardObject& other) {} //충돌 이벤트 x
 
 
+//8ball업데이트 처리
 //플레이어 볼과 8번공,속도를 받음
 void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardObject& eightBall, int V) {
 	if (win == WIN) {
@@ -49,8 +51,10 @@ void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardO
 		case BASIC:
 		{
 			if (playerBall.getVelocity() == sf::Vector2f(0, 0)) {}
-			else //플레이어 볼의 속도가 변했을 때
+			else{ //플레이어 볼의 속도가 변했을 때
+				playerBall.setFoul(false);
 				setPhase(MOVE); //공 친 상태로 변경
+			}
 		}
 		break;
 		case MOVE:
@@ -83,6 +87,7 @@ void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardO
 					//흰 공이 들어간 경우이므로 무조건 턴 변경
 					playerBall.setPosition(800, 500); //플레이어볼의 포지션 정하기
 					BilliardPocket::outBall(BilliardPocket::InPocket(playerBall)); //흰공을 포켓에서 꺼냄
+					playerBall.setFoul(true);
 					DiffSize = BilliardPocket::getSizePocket() - Player::getSizePocket(); //크기차이 재갱신
 					IfTypeSet(DiffSize); //타입 판단 후 결정
 					setTurn(false); //턴종료
@@ -106,12 +111,14 @@ void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardO
 	}
 }
 
+//8ball전용: ball타입에 따른 설정
 void Player::IfTypeSet(int DiffSize) {
 	if (isLast())
 		setWin(LAST);
 	setPhase(BASIC);
 	Player::setSizePocket(BilliardPocket::getSizePocket()); //포켓 크기 갱신
-	setScore(stoi(getScore()) + (DiffSize));
+	if(DiffSize>0)
+		setScore(stoi(getScore()) + (DiffSize));
 	int str = 0; //스트라이프
 	int sol = 0; //솔리드
 	if (DiffSize != 0) {
@@ -146,6 +153,60 @@ void Player::IfTypeSet(int DiffSize) {
 	}
 }
 
+//3ball 업데이트 처리
+void Player::ThreeBallupdate(SampleBilliardGameBall& playerBall, int V) {
+	if (win == WIN) {
+		return; //이겼다면 실행x
+	}
+	//플레이어 턴일 때
+	if (turn) {
+		switch (Phase) {  //Phase : 공의 상태
+		case BASIC:
+		{
+			if (playerBall.getVelocity() == sf::Vector2f(0, 0)) {}
+			else { //플레이어 볼의 속도가 변했을 때
+				playerBall.setFoul(false);
+				setPhase(MOVE); //공 친 상태로 변경
+			}
+		}
+		break;
+		case MOVE:
+		{
+			if (whether == DEFAULT) {
+				if (playerBall.isNewCollideBall() && playerBall.getCollideBoardCnt() >= 3) {
+					whether = SUCCESS;
+				}
+				else if(playerBall.isNewCollideBall() && playerBall.getCollideBoardCnt() < 3) {
+					whether = FAILURE;
+				}
+			}
+			if (V == 0) //속도가 모두 0이라면
+				setPhase(STOP); //친 후의 상태로 변경
+		}
+		break;
+		case STOP:
+		{
+			//모든 값 초기화
+			playerBall.InitNewCollideBall();
+			playerBall.setCollideBoardCnt(0);
+			if (whether == SUCCESS) {
+				setScore(score+1); //1득점 턴유지
+				if (score >= 20)
+					yourWin();
+			}
+			else { 
+				setTurn(false);
+				getNextP().setTurn(true);
+			}
+			whether = DEFAULT;
+			setPhase(BASIC);
+		}
+		break;
+		}
+	}
+}
+
+//8ball 점수 랜더링
 void Player::render(sf::RenderTarget& target) {
 	// 점수판
 	sf::Text P_score;
@@ -209,7 +270,9 @@ void Player::render(sf::RenderTarget& target) {
 		TurnText.setPosition(100.f + (PlayerNum - 1) * 180.f, 350.f);
 	if (win == true)
 		WinText.setPosition(100.f + (PlayerNum - 1) * 180.f, 350.f);
-	BallText.setPosition(50.f + (PlayerNum - 1) * 190.f, 150.f);
+	BallText.setPosition(60.f + (PlayerNum - 1) * 190.f, 150.f);
+	if(ballType>0)
+		BallText.setPosition(80.f + (PlayerNum - 1) * 190.f, 150.f);
 
 	target.draw(P_score);
 	target.draw(ScoreText);
@@ -220,6 +283,68 @@ void Player::render(sf::RenderTarget& target) {
 			target.draw(TurnText);
 	}
 	target.draw(BallText);
+}
+
+//3ball 점수 렌더링
+void Player::ThreeBallrender(sf::RenderTarget& target) {
+	// 점수판
+	sf::Text P_score;
+	sf::Text ScoreText;
+	sf::Text TurnText;
+	sf::Text WinText;
+
+	//폰트 설정
+	P_score.setFont(SampleGame::getFont());
+	ScoreText.setFont(SampleGame::getFont());
+	TurnText.setFont(SampleGame::getFont());
+	WinText.setFont(SampleGame::getFont());
+
+	//색
+	P_score.setFillColor(sf::Color::White);
+	ScoreText.setFillColor(sf::Color::Cyan);
+	TurnText.setFillColor(sf::Color::Cyan);
+	WinText.setFillColor(sf::Color::Cyan);
+
+	//크기
+	P_score.setCharacterSize(80);
+	ScoreText.setCharacterSize(50);
+	TurnText.setCharacterSize(40);
+	WinText.setCharacterSize(40);
+
+	//점수 가져옴
+	P_score.setString(getScore());
+	P_score.setOutlineColor(sf::Color::Cyan);
+	P_score.setOutlineThickness(1.f);
+
+	std::string str1 = "player";
+	std::string str2 = std::to_string(PlayerNum);
+	ScoreText.setString(str1 + str2);
+	ScoreText.setOutlineColor(sf::Color::White);
+	ScoreText.setOutlineThickness(1.f);
+
+	TurnText.setString("Turn");
+	TurnText.setOutlineColor(sf::Color::Red);
+	TurnText.setOutlineThickness(1.f);
+
+	WinText.setString("Win");
+	WinText.setOutlineColor(sf::Color::Yellow);
+	WinText.setOutlineThickness(1.f);
+
+	P_score.setPosition(120.f + (PlayerNum - 1) * 180.f, 250.f);
+	ScoreText.setPosition(70.f + (PlayerNum - 1) * 180.f, 200.f);
+	if (turn == true)
+		TurnText.setPosition(100.f + (PlayerNum - 1) * 180.f, 350.f);
+	if (win == true)
+		WinText.setPosition(100.f + (PlayerNum - 1) * 180.f, 350.f);
+
+	target.draw(P_score);
+	target.draw(ScoreText);
+	if (turn == true) {
+		if (win == true)
+			target.draw(WinText);
+		else
+			target.draw(TurnText);
+	}
 }
 
 int Player::getPlayerNum() const {
@@ -327,6 +452,7 @@ void Player::Init() {
 	PocketSize = 0;
 	turn = false;
 	Phase = BASIC;
+	whether = DEFAULT;
 	win = DEFAULT;
 	score = 0;
 	ballType = BREAKSHOT;

@@ -38,6 +38,9 @@ public:
 	// 积己磊 
 	SampleBilliardBoard(void);
 
+	//3,4备侩
+	SampleBilliardBoard(int);
+
 	// 家戈磊 
 	~SampleBilliardBoard(void);
 

@@ -34,17 +34,6 @@ SampleBilliardBall::SampleBilliardBall(sf::Vector2f position, float radius, sf::
 		y = position.y + radius * sinf(((360.f) / (static_cast<float>(NUMVERTICES - 2)) * i + angle) * float(M_PI) / 180.f);
 		vertices[i] = sf::Vertex(sf::Vector2f(x, y), color);
 	}
-
-	//공들 부딪히는 소리
-	if (!effectBuffer[0].loadFromFile("billiard_ball.wav"))
-		std::cout << "이펙트 사운드를 로딩할 수 없습니다." << std::endl;
-	effectSound[0].setBuffer(effectBuffer[0]);
-
-	//포켓 들어가는 소리
-	if (!effectBuffer[1].loadFromFile("billiard_goal.wav"))
-		std::cout << "이펙트 사운드를 로딩할 수 없습니다." << std::endl;
-	effectSound[1].setBuffer(effectBuffer[1]);
-
 }
 
 SampleBilliardBall::SampleBilliardBall(const SampleBilliardBall& rhs) : SampleBilliardBall(rhs.position, rhs.radius, rhs.color)
@@ -190,6 +179,11 @@ void SampleBilliardBall::update(float timeElapsed)
 // Sample Game의 객체들은 반드시 충돌 물리 구현해야 함
 void SampleBilliardBall::collide(SampleBilliardObject& other)
 {
+	SampleBilliardGameBall* pb = dynamic_cast<SampleBilliardGameBall*>(this);
+	//플레이어 볼이 선택된 상태인 경우, 충돌 이벤트 발생하지 않음. 
+	if (pb)
+		if (pb->isSelected())
+			return;
 	// 공과 충돌할 경우 
 	if (dynamic_cast<SampleBilliardBall*>(&other) != nullptr)
 	{
@@ -250,6 +244,12 @@ void SampleBilliardBall::collideWithBall(SampleBilliardBall& other)
 		return;
 	}
 
+	SampleBilliardGameBall* pb = dynamic_cast<SampleBilliardGameBall*>(&other);
+	//플레이어 볼이 선택된 상태인 경우, 충돌 이벤트 발생하지 않음. 
+	if (pb)
+		if (pb->isSelected())
+			return;
+
 	// 거리 계산 
 	sf::Vector2f distance = getPosition() - other.getPosition();
 	float distanceBetween = (sqrtf((distance.x * distance.x) + (distance.y * distance.y)));
@@ -257,10 +257,13 @@ void SampleBilliardBall::collideWithBall(SampleBilliardBall& other)
 	// 두 공이 겹치는지 검사 
 	if (distanceBetween < (getRadius() + other.getRadius()))
 	{
+		//현재 공이 플레이어볼일 때 충돌한 공을 넣음.
+		if(typeid(*this) == typeid(SampleBilliardGameBall))
+			dynamic_cast<SampleBilliardGameBall*>(this)->setNewCollideBall(other);
 		//포켓하고 충돌할 경우
 		if (dynamic_cast<BilliardPocket*>(&other) != nullptr)
 		{
-			effectPocketSound();
+			BaseGame::effectPocketSound();
 			//포켓 오브젝트에서 처리함.
 			//gameObjects에서 삭제해주고 pocket오브젝트에 넣을 것(미구현)
 			return;
@@ -269,7 +272,7 @@ void SampleBilliardBall::collideWithBall(SampleBilliardBall& other)
 		//두 공의 속도가 0이 아닐 때만 발생하도록
 		if(other.getVelocity().x!=0&& other.getVelocity().y!= 0&&
 			getVelocity().x!=0&& getVelocity().y != 0)
-			effectBallSound();
+			BaseGame::effectBallSound();
 
 		// 겹치는 정도 계산 
 		float overlap = (distanceBetween - getRadius() - other.getRadius()) / 2.f;
@@ -324,9 +327,14 @@ void SampleBilliardBall::collideWithBoard(SampleBilliardBoard& other)
 		float overlap = distanceBetween - getRadius();
 		if (distanceBetween <= getRadius())
 		{
+			//현재 공이 플레이어볼일 때 충돌 횟수를 추가함
+			if (typeid(*this) == typeid(SampleBilliardGameBall)) {
+				SampleBilliardGameBall* Ball = dynamic_cast<SampleBilliardGameBall*>(this);
+				Ball->setCollideBoardCnt(Ball->getCollideBoardCnt() + 1);
+			}
 			if (t > -0.f && t < 1.f)
 			{
-				effectBallSound(); //board에 공이 부딪힐 때
+				BaseGame::effectBallSound(); //board에 공이 부딪힐 때
 				setPosition(p.x - distance.x * overlap / distanceBetween, p.y - distance.y * overlap / distanceBetween);
 				setVelocity(-normal.x * dotProductNormal + tangential.x * dotProductTangential,
 					-normal.y * dotProductNormal + tangential.y * dotProductTangential);
@@ -348,14 +356,4 @@ bool SampleBilliardBall::isOwner(std::string owner)
 std::string SampleBilliardBall::getOwner(void)
 {
 	return owner;
-}
-
-void SampleBilliardBall::effectBallSound(void)
-{
-	effectSound[0].play();
-}
-
-void SampleBilliardBall::effectPocketSound(void)
-{
-	effectSound[1].play();
 }
