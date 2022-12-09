@@ -8,6 +8,5 @@ int main(void)
 		StartGame Game(1028, 960, 60);
 		Game.Info();
 	}
-
 	return 0;
 }

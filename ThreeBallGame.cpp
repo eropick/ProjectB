@@ -45,10 +45,10 @@ void ThreeBallGame::makeBilliardObject()
 	// ThreeBallGame을 위한 당구대 생성 및 등록 
 	gameObjects.push_back(new SampleBilliardBoard(0));
 
-	float R = 13;
+	float R = 12;
 	//플레이어볼
 	SampleBilliardGameBall* PlayerBall =
-		new SampleBilliardGameBall(sf::Vector2f(900, 500), R, sf::Color::White);
+		new SampleBilliardGameBall(sf::Vector2f(800, 500), R, sf::Color::White);
 	playerBall = PlayerBall;
 	PlayerBall->setOwner("P");
 	PlayerBall->setPlayable(true);
@@ -61,14 +61,14 @@ void ThreeBallGame::makeBilliardObject()
 	typedef sf::Color C;
 
 	//색 매핑
-	C color[2] = { C::Yellow, C::Color(125,125,128) };
+	C color[2] = { C::Yellow, C::Red };
 
 	//공 좌표 매핑
-	sf::Vector2f Cord[2] = { {900,280},{870,320} };
+	sf::Vector2f Cord[2] = { { 750,500 },{ 800,320 } };
 
 	for (int i = 0; i < 2; ++i) {
 		ball[i] = new SampleBilliardBall(Cord[i], R, color[i]);
-		ball[i]->setOwner(std::to_string(i + 1));
+		ball[i]->setOwner(std::to_string(i+1));
 		gameObjects.push_back(ball[i]);
 	}
 

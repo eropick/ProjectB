@@ -67,7 +67,7 @@ void SampleGame::makeBilliardObject()
 	}
 
 	// SampleGame을 위한 당구공 생성 및 등록 
-
+	
 	//1번공 기준 좌표
 	sf::Vector2f one = { 800,300 };
 	//반경
@@ -221,7 +221,6 @@ void SampleGame::handle(sf::Event& ev)
 					StopTimer = playerClock.getElapsedTime().asSeconds();
 				ExitWindow->Open();
 			}
-				
 		}
 		if (ExitWindow->isOpen())
 			break;
@@ -467,7 +466,7 @@ void SampleGame::update(void)
 	//핸들링 종료 시
 	if (!(power->isPressedSpace() || power->isDraggingPower()) && power->getDraggedDistance() != 0) {
 		//속도 조절 인수
-		float V = 3.f; //속도 배수 조정
+		float V = 4.f; //속도 배수 조정
 		playerBall->setVelocity(V * power->getDraggedDistance() * Dirvec);
 		//끌린 거리 초기화
 		power->InitDraggedDistance();
@@ -518,7 +517,7 @@ void SampleGame::renderDirection(sf::RenderTarget& target) {
 		sf::Vector2f distance = (Posvec - playerBall->getPosition());
 		float distanceBetween = sqrt(distance.x * distance.x + distance.y * distance.y); //거리를 구함
 		float resize = 2000.f; //크기를 최대한 늘림
-		Dirvec = distance / distanceBetween; //단위 방향벡터
+		Dirvec = distance / distanceBetween; //방향벡터
 		sf::Vector2f toResizing(resize *Dirvec);
 		Posvec = toResizing + playerBall->getPosition();
 		sf::Color directionColor = sf::Color(255, 0, 0);
@@ -543,7 +542,6 @@ void SampleGame::renderDirection(sf::RenderTarget& target) {
 		//큐대의 회전각도 => cos각도 +-를 구분할 수 없음. 
 		//따라서 rotationX의 y값이 음수; 큐대의 방향벡터보다 위에 있는지를 판단해서 각도에 -부여. 
 		float CueAngle = 180 * (acosf(InnerPd / resize) / M_PI); //Radian to Degree
-		
 		if (rotationX.y<0)
 			CueAngle = CueAngle * -1.0f;
 		CueSprite.setRotation(CueAngle);

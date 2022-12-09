@@ -59,8 +59,8 @@ void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardO
 		break;
 		case MOVE:
 		{
-			if (V == 0) //속도가 모두 0이라면
-				setPhase(STOP); //친 후의 상태로 변경
+			if (V == 0) //공의 속도가 모두 0이라면
+				setPhase(STOP); //정지 상태로 변경
 		}
 		break;
 		case STOP:
@@ -96,7 +96,8 @@ void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardO
 				else //8과 플레이어 볼을 제외한 목적구가 들어갔다면
 					IfTypeSet(DiffSize);
 			}
-			else { //변화가 없다면
+			//변화가 없다면
+			else { 
 				if (ballType == BREAKSHOT) {
 					setBallType(UNKNOWN);
 					getNextP().setBallType(UNKNOWN);
@@ -104,6 +105,12 @@ void Player::EightBallupdate(SampleBilliardGameBall& playerBall, SampleBilliardO
 				setPhase(BASIC); //전 상태로 돌림
 				setTurn(false); //턴 종료
 				getNextP().setTurn(true); //다음 플레이어에게 턴넘김
+			}
+
+			//공이 당구대 밖으로 나갔는지에 대한 판별
+			if (!SampleBilliardBoard::inBoard(playerBall.getPosition())) {
+				playerBall.setFoul(true);
+				playerBall.setPosition(800, 500);
 			}
 		}
 		break;
@@ -200,6 +207,10 @@ void Player::ThreeBallupdate(SampleBilliardGameBall& playerBall, int V) {
 			}
 			whether = DEFAULT;
 			setPhase(BASIC);
+			//공이 당구대 밖으로 나갔는지에 대한 판별
+			if (!SampleBilliardBoard::inBoard(playerBall.getPosition())) {
+				playerBall.setPosition(800, 500);
+			}
 		}
 		break;
 		}
@@ -255,9 +266,11 @@ void Player::render(sf::RenderTarget& target) {
 	WinText.setOutlineColor(sf::Color::Yellow);
 	WinText.setOutlineThickness(1.f);
 
-	if (ballType <= 0)
+	if(ballType == BREAKSHOT)
+		BallText.setString("BreakShot");
+	else if (ballType == UNKNOWN)
 		BallText.setString("Unknown");
-	else if (ballType == 1)
+	else if (ballType == SOLIDS)
 		BallText.setString("Solids");
 	else
 		BallText.setString("Stripes");

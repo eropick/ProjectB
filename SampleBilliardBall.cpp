@@ -170,7 +170,7 @@ void SampleBilliardBall::update(float timeElapsed)
 	setAngle(atan2f(velocity.y, velocity.x) * 180.f / float(M_PI));
 
 	// 속도가 0.3보다 작으면 마찰을 가정하여 0으로 지정 
-	if (std::abs(velocity.x) < 0.3f || std::abs(velocity.y) < 0.3f)
+	if (std::abs(velocity.x) < 0.05f || std::abs(velocity.y) < 0.05f)
 	{
 		velocity = sf::Vector2f(0.f, 0.f);
 	}
@@ -230,7 +230,6 @@ void SampleBilliardBall::render(sf::RenderTarget& target)
 	if (owner == "8")
 	{
 		ballText.setFillColor(sf::Color::White);
-
 	}
 
 	target.draw(ballText);
@@ -249,7 +248,6 @@ void SampleBilliardBall::collideWithBall(SampleBilliardBall& other)
 	if (pb)
 		if (pb->isSelected())
 			return;
-
 	// 거리 계산 
 	sf::Vector2f distance = getPosition() - other.getPosition();
 	float distanceBetween = (sqrtf((distance.x * distance.x) + (distance.y * distance.y)));
@@ -332,7 +330,7 @@ void SampleBilliardBall::collideWithBoard(SampleBilliardBoard& other)
 				SampleBilliardGameBall* Ball = dynamic_cast<SampleBilliardGameBall*>(this);
 				Ball->setCollideBoardCnt(Ball->getCollideBoardCnt() + 1);
 			}
-			if (t > -0.f && t < 1.f)
+			if (t > 0.f && t < 1.f)
 			{
 				BaseGame::effectBallSound(); //board에 공이 부딪힐 때
 				setPosition(p.x - distance.x * overlap / distanceBetween, p.y - distance.y * overlap / distanceBetween);

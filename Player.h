@@ -76,7 +76,7 @@ public:
 	void setWin(int n); //승리 단계 설정
 	int isWin() const; //승리 단계
 
-	bool isLast(); //플레이어가 마지막 단계인지 확인 
+	bool isLast(); //목적구가 7개가 달성되었는지 확인 
 
 	void setBallType(int type); //공 타입
 	int getBallType() const;
@@ -97,11 +97,11 @@ private:
 	static Player* TurnPlayer; //정적멤버로 턴을 가지고 있는 플레이어를 넣는다.	
 	static int PocketSize; //포켓의 요소 수를 저장함(포켓 크기의 변화를 판단할 때 사용할 것.
 	bool turn;
-	int Phase; // 공 치기 전 : 0 || 공을 친 상태 : 1 || 공을 치고 정지 : -1 
-	int win; // 승리 : 1 || 승리전 : 0 || 기본: -1
+	int Phase; // 공 치기 전 : BASIC || 공을 친 상태 : MOVE || 공을 치고 정지 : STOP 
+	int win; // WIN : 1 || LAST : 0 || DEFAULT: -1
 	int score;
-	int ballType; //-1: 브레이크 샷(초구) || 0: 미정  | 1: Solids  | 9:  Stripes 
-	int whether; //성공,실패 여부
+	int ballType; //-1: 브레이크 샷(초구) || 0: 미정 | 1: Solids  | 9:  Stripes 
+	int whether; //성공,실패 여부 - 3구용
 	int PlayerNum; //플레이어 넘버
 	int PutBallCnt; //넣은 공의 수 : 흰 공 제외
 	Player* NextP; //다음 플레이어의 주소
