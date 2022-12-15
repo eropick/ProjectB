@@ -97,8 +97,8 @@ private:
 	SampleBilliardGameBall* playerBall;
 
 	//공 테스트용
-	bool isCatchingBall;
-	SampleBilliardBall* catchedBall;
+	//bool isCatchingBall;
+	//SampleBilliardBall* catchedBall;
 
 	// 게임 전역 폰트 
 	static sf::Font* font;

@@ -21,6 +21,8 @@ public:
 	bool isPlayable(void);
 	void setPlayable(bool playable);
 
+	bool collideWithFourBall(SampleBilliardGameBall& other);
+
 	// 게임 공에 숫자를 그리기 위해 virtual 함수 재정의 
 	void render(sf::RenderTarget& window);
 
@@ -46,10 +48,12 @@ public:
 	bool isNewCollideBall();
 	void InitNewCollideBall();
 
+
 	//테스트코드
 	void setTrueCB();
 private:
 	SampleBilliardBall* CollideBall;
+	SampleBilliardBall* CollideBall1;
 	bool playable;
 	bool Foul;
 	bool Selected;

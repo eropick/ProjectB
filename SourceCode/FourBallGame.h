@@ -22,17 +22,18 @@
 #include "Power.h"
 #include "GameExit.h"
 
-class SampleGame : public BaseGame
+class FourBallGame : public BaseGame
 {
 public:
-	// Sample Game 초기화 
-	SampleGame(int width, int height, int fpsLimit, int option);
+	//3구 초기화 
+	FourBallGame(int width, int height, int fpsLimit, int option);
 
-	// Sample Game 해제 
-	virtual ~SampleGame(void);
+	//해제 
+	virtual ~FourBallGame(void);
 
 	// Sample Game 전역 폰트 
 	static const sf::Font& getFont(void);
+
 
 protected:
 	// 상속 클래스는 반드시 이벤트 핸들링 함수 구현해야 함 
@@ -45,15 +46,16 @@ protected:
 	virtual void render(sf::RenderTarget& target);
 
 private:
-
 	//공의 방향 랜더링
-	void renderDirection(sf::RenderTarget& target);
-
+	void renderDirection1(sf::RenderTarget& target);
+	void renderDirection2(sf::RenderTarget& target);
 	//타이머 랜더링
 	void PlayerTimerRender(sf::RenderTarget& target);
 
 	//당구대 경계 안으로 벡터 수정
 	sf::Vector2f FixVec(sf::Vector2f vec);
+
+	sf::Vector2f FixVec1(sf::Vector2f vec);
 
 	//오브젝트 초기화
 	void makeBilliardObject();
@@ -62,7 +64,7 @@ private:
 	// Sample Game에서 관리하는 게임 오브젝트들 (공, 당구대 등) 
 	std::vector<SampleBilliardObject*> gameObjects;
 	std::vector<Player*> Players;
-	
+
 	//게임 종료창
 	GameExit* ExitWindow;
 
@@ -78,12 +80,17 @@ private:
 	//마우스로 끌었는지 여부
 	bool isDraggedMouse;
 
+	//PlayerBall과 당구대 충돌횟수	
+	int CollideBoardCnt;
+
 	//파워
 	Power* power;
 	//위치벡터
 	sf::Vector2f Posvec;
+	sf::Vector2f Posvec1;
 	//방향 벡터
 	sf::Vector2f Dirvec;
+	sf::Vector2f Dirvec1;
 
 	//큐대 텍스쳐
 	sf::Texture CueTexture;
@@ -92,6 +99,7 @@ private:
 	sf::Vector2f CueDirvec;
 
 	SampleBilliardGameBall* playerBall;
+	SampleBilliardGameBall* playerBall1;
 
 	//공 테스트용
 	bool isCatchingBall;
